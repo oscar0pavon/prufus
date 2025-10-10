@@ -3,6 +3,7 @@
 #include <GL/glx.h>
 #include <unistd.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 int main() {
 

@@ -1,4 +1,4 @@
-CFLAGS := 
+CFLAGS := -I/usr/include
 CLINKS := -lX11 -lGL
 
 .PHONY: prufus
