@@ -14,7 +14,6 @@ https://github.com/oscar0pavon/prufus/tree/v0.1
 - wimlib-imagex (this program divide the big Windows installation file in parts because the restriction of FAT32 filesystem about 4GB per file)
 - dosfstools (it's for create the first partition EFI)
 - ntfs3g (for creating a second partition for user data and set disk label)
--
 ```
 ### Runtime dependency
 ```
