@@ -7,7 +7,13 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <pthread.h>
 
+
+bool prufus_window_running = true;
+XEvent window_event;
+
+Display* display;
 
 void init_opengl(){
     glMatrixMode(GL_PROJECTION);
@@ -47,10 +53,41 @@ void draw_button(float x, float y, float width, float height,
     glEnd();
 }
 
+void* handle_input(void* none){
+
+    int mouse_click_x = 0;
+    int mouse_click_y = 0;
+
+    while (prufus_window_running) {
+    
+        XNextEvent(display, &window_event);
+
+        switch (window_event.type) {
+            case ClientMessage:
+                if (window_event.xclient.message_type == 
+                        XInternAtom(display, "WM_PROTOCOLS", False) &&
+                    (Atom)window_event.xclient.data.l[0] == 
+                    XInternAtom(display, "WM_DELETE_WINDOW", False)) {
+                    // or prompt the user for confirmation
+                    prufus_window_running = false; 
+                }
+                break;
+            case ButtonPress:
+                printf("Mouse clicked: %d , %d\n",window_event.xbutton.x,
+                        window_event.xbutton.y);
+
+                mouse_click_x = window_event.xbutton.x;
+                mouse_click_y = window_event.xbutton.y;
+
+                break;
+        }
+    }    
+}
+
 
 int main() {
 
-    Display* display = XOpenDisplay(NULL); // NULL for default display
+    display = XOpenDisplay(NULL); // NULL for default display
     if (display == NULL) {
         // Handle error
         return 1;
@@ -102,38 +139,15 @@ int main() {
 
     XSelectInput(display, prufus_window, ButtonPressMask);
 
-    bool prufus_window_running = true;
 
     init_opengl();
+    
+    pthread_t input_thread;
 
-    XEvent window_event;
+    pthread_create(&input_thread,NULL,handle_input,NULL);
 
-    int mouse_click_x = 0;
-    int mouse_click_y = 0;
 
     while (prufus_window_running) {
-        XNextEvent(display, &window_event);
-
-        switch (window_event.type) {
-            case ClientMessage:
-                if (window_event.xclient.message_type == 
-                        XInternAtom(display, "WM_PROTOCOLS", False) &&
-                    (Atom)window_event.xclient.data.l[0] == 
-                    XInternAtom(display, "WM_DELETE_WINDOW", False)) {
-                    // or prompt the user for confirmation
-                    prufus_window_running = false; 
-                }
-                break;
-            case ButtonPress:
-                printf("Mouse clicked: %d , %d\n",window_event.xbutton.x,
-                        window_event.xbutton.y);
-
-                mouse_click_x = window_event.xbutton.x;
-                mouse_click_y = window_event.xbutton.y;
-
-                break;
-            // Handle other event types (Expose, KeyPress, etc.)
-        }
 
 
         glClearColor(246.0f/255.0f, 245.0f/255.0f, 244.0f/255.0f, 1.0f);
