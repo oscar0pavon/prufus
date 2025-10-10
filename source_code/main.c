@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <math.h>
 
+#define WINDOW_WIDTH 500
+#define WINDOW_HEIGHT 650
 
 bool prufus_window_running = true;
 XEvent window_event;
@@ -40,7 +42,6 @@ typedef struct Button{
 void init_opengl(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-
      // Example for a 2D projection where 0,0 is top-left and width,height is bottom-right
     float left = 0.0f;
     float right = (float)500; // Replace with your window's width
@@ -234,8 +235,12 @@ int main() {
     class_hint.res_name = "prufus";
     class_hint.res_class = "prufus"; 
 
+
+
+
+
     Window prufus_window = XCreateWindow(display, RootWindow(display, window_visual->screen),
-            0, 0, 500, 650, 0, 
+            0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 
             window_visual->depth, InputOutput, window_visual->visual, 
             CWBorderPixel | CWColormap | CWEventMask, &window_attributes);
 
@@ -243,6 +248,14 @@ int main() {
     XSetStandardProperties(display, prufus_window, 
             "prufus", "prufus", None, NULL, 0, NULL);
 
+    XSizeHints hints;
+    hints.flags = PMinSize | PMaxSize;
+    hints.min_width = WINDOW_WIDTH;
+    hints.min_height = WINDOW_HEIGHT;
+    hints.max_width = WINDOW_WIDTH;
+    hints.max_height = WINDOW_HEIGHT;
+
+    XSetWMNormalHints(display,prufus_window,&hints);
 
     // GL_TRUE for direct rendering
     GLXContext cx = glXCreateContext(display, window_visual, None, GL_TRUE); 
