@@ -16,8 +16,6 @@ https://github.com/oscar0pavon/prufus/tree/v0.1
 - ntfs3g (for creating a second partition for user data and set disk label)
 
 
-
-```
 ### Runtime dependency
 ```
 sudo apt install wimtools
