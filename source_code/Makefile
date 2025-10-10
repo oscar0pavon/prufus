@@ -1,5 +1,5 @@
 CFLAGS := -I/usr/include
-CLINKS := -lX11 -lGL -lpthread
+CLINKS := -lX11 -lGL -lpthread -lm
 
 .PHONY: prufus
 

@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <math.h>
 
 
 bool prufus_window_running = true;
@@ -62,8 +63,73 @@ void button_new(Button* out, Vec2 position, Vec2 dimension){
     out->aabb.max.x = position.x + dimension.x;
     out->aabb.max.y = position.y + dimension.y;
 }
+void draw_border(float x, float y, float width, float height, float radius, int segments) {
 
-void gl_draw_button(float x, float y, float width, float height, 
+    glColor3f(211.f/255.f, 211.f/255.f, 211.f/255.f); 
+    glLineWidth(2.0f);
+    glBegin(GL_POLYGON);
+
+    // Top-right corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = M_PI_2 * i / segments; // 0 to 90 degrees
+        glVertex2f(x + width - radius + radius * cos(angle), y + height - radius + radius * sin(angle));
+    }
+    // Top-left corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = M_PI_2 + M_PI_2 * i / segments; // 90 to 180 degrees
+        glVertex2f(x + radius + radius * cos(angle), y + height - radius + radius * sin(angle));
+    }
+    // Bottom-left corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = M_PI + M_PI_2 * i / segments; // 180 to 270 degrees
+        glVertex2f(x + radius + radius * cos(angle), y + radius + radius * sin(angle));
+    }
+    // Bottom-right corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = 1.5f * M_PI + M_PI_2 * i / segments; // 270 to 360 degrees
+        glVertex2f(x + width - radius + radius * cos(angle), y + radius + radius * sin(angle));
+    }
+    glEnd();
+
+
+}
+
+void gl_draw_button(float x, float y, float width, float height, float radius, int segments) {
+    
+
+    draw_border(x-1,y-1,width+2,height+2,radius,segments);
+
+    glColor3f(1.f, 1.0f, 1.0f); // Black border
+    glLineWidth(10.0f); // Border thickness
+
+    glBegin(GL_POLYGON);
+
+    // Top-right corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = M_PI_2 * i / segments; // 0 to 90 degrees
+        glVertex2f(x + width - radius + radius * cos(angle), y + height - radius + radius * sin(angle));
+    }
+    // Top-left corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = M_PI_2 + M_PI_2 * i / segments; // 90 to 180 degrees
+        glVertex2f(x + radius + radius * cos(angle), y + height - radius + radius * sin(angle));
+    }
+    // Bottom-left corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = M_PI + M_PI_2 * i / segments; // 180 to 270 degrees
+        glVertex2f(x + radius + radius * cos(angle), y + radius + radius * sin(angle));
+    }
+    // Bottom-right corner
+    for (int i = 0; i <= segments; ++i) {
+        float angle = 1.5f * M_PI + M_PI_2 * i / segments; // 270 to 360 degrees
+        glVertex2f(x + width - radius + radius * cos(angle), y + radius + radius * sin(angle));
+    }
+    glEnd();
+
+
+}
+
+void gl_draw_button2(float x, float y, float width, float height, 
         float r, float g, float b) {
 
     glColor3f(r, g, b); // Set button color
@@ -86,8 +152,10 @@ void gl_draw_button(float x, float y, float width, float height,
 }
 
 void draw_button(Button* button){
-    gl_draw_button(button->position.x, button->position.y, 
-            button->dimention.x, button->dimention.y, 1 ,1 ,1);
+
+    gl_draw_button(button->position.x, button->position.y,
+            button->dimention.x, button->dimention.y,
+            3, 2);
 }
 
 void* handle_input(void* none){
@@ -114,6 +182,12 @@ void* handle_input(void* none){
                 mouse_click_x = window_event.xbutton.x;
                 mouse_click_y = window_event.xbutton.y;
 
+                break;
+
+            case ButtonRelease:
+                mouse_click_x = 0;
+                mouse_click_y = 0;
+                printf("click release\n");
                 break;
         }
     }    
@@ -153,7 +227,8 @@ int main() {
     XSetWindowAttributes window_attributes;
     window_attributes.colormap = cmap;
     window_attributes.border_pixel = 0;
-    window_attributes.event_mask = ExposureMask | KeyPressMask | StructureNotifyMask;
+    window_attributes.event_mask =
+        ExposureMask | KeyPressMask | StructureNotifyMask;
 
     XClassHint class_hint;
     class_hint.res_name = "prufus";
@@ -168,6 +243,7 @@ int main() {
     XSetStandardProperties(display, prufus_window, 
             "prufus", "prufus", None, NULL, 0, NULL);
 
+
     // GL_TRUE for direct rendering
     GLXContext cx = glXCreateContext(display, window_visual, None, GL_TRUE); 
     if (cx == NULL) {
@@ -181,7 +257,7 @@ int main() {
 
     XMapWindow(display, prufus_window);
 
-    XSelectInput(display, prufus_window, ButtonPressMask);
+    XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask);
 
 
     init_opengl();
@@ -208,8 +284,6 @@ int main() {
 
 
         draw_button(&create_button);
-
-
 
 
 
