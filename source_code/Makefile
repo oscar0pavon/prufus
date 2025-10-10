@@ -1,10 +1,10 @@
-CFLAGS := $(shell pkg-config --cflags gtk4)
-CLINKS := $(shell pkg-config --libs gtk4)
+CFLAGS := 
+CLINKS := -lX11 -lGL
 
 .PHONY: prufus
 
-prufus: usb_validator.o user_interface.o scripts_names.h main.c
-	cc $(CFLAGS) usb_validator.o user_interface.o main.c -o ../prufus $(CLINKS)
+prufus: main.c
+	cc $(CFLAGS) main.c -o ../prufus $(CLINKS)
 
 user_interface.o: user_interface.c
 	cc $(CFLAGS) -c user_interface.c
