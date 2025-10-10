@@ -10,16 +10,11 @@ https://github.com/oscar0pavon/prufus/tree/v0.1
 - GNU/Linux
 - make
 - gcc
-- >=GTK-4.10
 - rsync
 - wimlib-imagex (this program divide the big Windows installation file in parts because the restriction of FAT32 filesystem about 4GB per file)
 - dosfstools (it's for create the first partition EFI)
 - ntfs3g (for creating a second partition for user data and set disk label)
-## Linux Mint/Ubuntu
-### Build dependency
-```
-sudo apt-get install git
-sudo apt-get install libgtk-4-dev
+-
 ```
 ### Runtime dependency
 ```
