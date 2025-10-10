@@ -3,6 +3,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/glx.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -12,8 +13,28 @@
 
 bool prufus_window_running = true;
 XEvent window_event;
+    
+int mouse_click_x = 0;
+int mouse_click_y = 0;
 
 Display* display;
+
+typedef struct Vec2{
+    uint8_t x;
+    uint8_t y;
+}Vec2;
+
+typedef struct AABB{
+   Vec2 min;
+   Vec2 max;
+} AABB;
+
+typedef struct Button{
+    AABB aabb;
+    Vec2 position;
+    Vec2 dimention;
+
+}Button;
 
 void init_opengl(){
     glMatrixMode(GL_PROJECTION);
@@ -31,7 +52,18 @@ void init_opengl(){
 
 }
 
-void draw_button(float x, float y, float width, float height, 
+void button_new(Button* out, Vec2 position, Vec2 dimension){
+    
+    out->position = position; 
+    out->dimention = dimension;
+
+    out->aabb.min.x = position.x;
+    out->aabb.min.y = position.y;
+    out->aabb.max.x = position.x + dimension.x;
+    out->aabb.max.y = position.y + dimension.y;
+}
+
+void gl_draw_button(float x, float y, float width, float height, 
         float r, float g, float b) {
 
     glColor3f(r, g, b); // Set button color
@@ -53,10 +85,13 @@ void draw_button(float x, float y, float width, float height,
     glEnd();
 }
 
+void draw_button(Button* button){
+    gl_draw_button(button->position.x, button->position.y, 
+            button->dimention.x, button->dimention.y, 1 ,1 ,1);
+}
+
 void* handle_input(void* none){
 
-    int mouse_click_x = 0;
-    int mouse_click_y = 0;
 
     while (prufus_window_running) {
     
@@ -82,6 +117,15 @@ void* handle_input(void* none){
                 break;
         }
     }    
+}
+
+bool check_button_clicked(Button* button){
+   if(mouse_click_x >= button->aabb.min.x && mouse_click_x <= button->aabb.max.x 
+           && mouse_click_y >= button->aabb.min.y && mouse_click_y <= button->aabb.max.y) {
+       return true;
+   }else{
+       return false;
+   }
 }
 
 
@@ -146,6 +190,9 @@ int main() {
 
     pthread_create(&input_thread,NULL,handle_input,NULL);
 
+    Button create_button;
+    button_new(&create_button, (Vec2){10,10}, (Vec2){100,50} );
+
 
     while (prufus_window_running) {
 
@@ -154,8 +201,15 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
+       
+        if(check_button_clicked(&create_button)){
+            printf("Button clicked\n");
+        }
 
-        draw_button(10,10,100,50,1,1,1);
+
+        draw_button(&create_button);
+
+
 
 
 
