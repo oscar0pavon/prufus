@@ -1,6 +1,6 @@
 ## prufus
-![prufus_gui](images/screenshot1.png)
-[![Download Button](images/download_button.png)](https://github.com/oscarpavon/prufus/releases/download/v0.001a/prufus_installer.zip)  
+![prufus_gui](images/screenshot1.png) [![Download Button](images/download_button.png)](https://github.com/oscarpavon/prufus/releases/download/v0.001a/prufus_installer.zip) 
+  
 
 You can create a bootable USB with Windows installer from GNU/Linux. And then you can install Windows on another computer. Useful for computer repair people or if you want to go back to Windows from Linux after a disappointment.  
 This is an open source project with GPL 3 license. That means you can modify it like you want, change the name or even sell it as long as you distribute with your changes to the source code.  
