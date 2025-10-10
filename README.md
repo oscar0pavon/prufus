@@ -3,6 +3,9 @@
 You can create a bootable USB with Windows installer from GNU/Linux. And then you can install Windows on another computer. Useful for computer repair people or if you want to go back to Windows from Linux after a disappointment.  
 This is an open source project with GPL 3 license. That means you can modify it like you want, change the name or even sell it as long as you distribute with your changes to the source code.  
 This program it's for only GNU/Linux
+
+This is the main branch if you want to use the stable version use:
+https://github.com/oscar0pavon/prufus/tree/v0.1
 # Dependencies
 - GNU/Linux
 - make
