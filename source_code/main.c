@@ -14,8 +14,18 @@
 #define WINDOW_WIDTH 500
 #define WINDOW_HEIGHT 650
 
+#define vec2(p1, p2)                                                           \
+  (Vec2) { p1, p2 }
+
+#define rgb(p1, p2, p3)                                                           \
+  (Vec3) { p1/255.0f, p2/255.0f, p3/255.0f }
+
 bool prufus_window_running = true;
+
+bool check_buttons_collision = false;
+
 XEvent window_event;
+
     
 int mouse_click_x = 0;
 int mouse_click_y = 0;
@@ -23,8 +33,8 @@ int mouse_click_y = 0;
 Display* display;
 
 typedef struct Vec2{
-    uint8_t x;
-    uint8_t y;
+    uint16_t x;
+    uint16_t y;
 }Vec2;
 
 typedef struct AABB{
@@ -38,6 +48,31 @@ typedef struct Button{
     Vec2 dimention;
 
 }Button;
+
+Button start_button;
+Button close_button;
+
+
+bool check_button_clicked(Button *button) {
+
+    if(!check_buttons_collision){
+        return false;
+    }
+
+  if (mouse_click_x >= button->aabb.min.x &&
+      mouse_click_x <= button->aabb.max.x &&
+      mouse_click_y >= button->aabb.min.y &&
+      mouse_click_y <= button->aabb.max.y) {
+
+      check_buttons_collision = false;
+      mouse_click_x = 0;
+      mouse_click_y = 0;
+        return true;
+  } else {
+    return false;
+  }
+}
+
 
 void init_opengl(){
     glMatrixMode(GL_PROJECTION);
@@ -186,22 +221,14 @@ void* handle_input(void* none){
                 break;
 
             case ButtonRelease:
-                mouse_click_x = 0;
-                mouse_click_y = 0;
-                printf("click release\n");
-                break;
+                check_buttons_collision = true;
+
+
+              break;
         }
     }    
 }
 
-bool check_button_clicked(Button* button){
-   if(mouse_click_x >= button->aabb.min.x && mouse_click_x <= button->aabb.max.x 
-           && mouse_click_y >= button->aabb.min.y && mouse_click_y <= button->aabb.max.y) {
-       return true;
-   }else{
-       return false;
-   }
-}
 
 
 int main() {
@@ -234,9 +261,6 @@ int main() {
     XClassHint class_hint;
     class_hint.res_name = "prufus";
     class_hint.res_class = "prufus"; 
-
-
-
 
 
     Window prufus_window = XCreateWindow(display, RootWindow(display, window_visual->screen),
@@ -279,8 +303,14 @@ int main() {
 
     pthread_create(&input_thread,NULL,handle_input,NULL);
 
-    Button create_button;
-    button_new(&create_button, (Vec2){10,10}, (Vec2){100,50} );
+    button_new(&start_button, vec2(10,10), vec2(100,50) );
+
+    button_new(&close_button, vec2(500-100,650-50), vec2(100,50) );
+
+    Button buttons[] = {
+        start_button, 
+        close_button
+    };
 
 
     while (prufus_window_running) {
@@ -290,19 +320,24 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
-       
-        if(check_button_clicked(&create_button)){
-            printf("Button clicked\n");
+      
+        int buttons_count = sizeof(buttons)/sizeof(Button);
+
+        for(int i = 0; i < buttons_count; i++){
+            if(check_button_clicked(&buttons[i])){
+                printf("Button clicked!\n");
+            }
+            draw_button(&buttons[i]);
         }
 
-
-        draw_button(&create_button);
 
 
 
         glFlush();
         
         glXSwapBuffers(display, prufus_window);
+
+        usleep(50000.f);
     }
 
     XDestroyWindow(display, prufus_window);
