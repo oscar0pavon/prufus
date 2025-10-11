@@ -4,7 +4,7 @@ CLINKS := -lX11 -lGL -lpthread -lm
 .PHONY: prufus
 
 prufus: main.c
-	cc $(CFLAGS) main.c -o ../prufus $(CLINKS)
+	cc $(CFLAGS) main.c -o ../prufus $(CLINKS) -fdiagnostics-color=always
 
 user_interface.o: user_interface.c
 	cc $(CFLAGS) -c user_interface.c

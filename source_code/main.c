@@ -303,13 +303,18 @@ int main() {
 
     pthread_create(&input_thread,NULL,handle_input,NULL);
 
-    button_new(&start_button, vec2(10,10), vec2(100,50) );
 
-    button_new(&close_button, vec2(500-100,650-50), vec2(100,50) );
+    button_new(&close_button, vec2(500-100,620-50), vec2(80,30) );
+    button_new(&start_button, vec2(400-100,620-50), vec2(80,30) );
+
+    Button select_button;
+
+    button_new(&select_button, vec2(500-100,200-50), vec2(80,30) );
 
     Button buttons[] = {
         start_button, 
-        close_button
+        close_button,
+        select_button
     };
 
 
