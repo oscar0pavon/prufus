@@ -37,6 +37,11 @@ int mouse_click_y = 0;
 
 Display* display;
 
+typedef struct UV{
+    float x;
+    float y;
+}UV;
+
 typedef struct Vec2{
     uint16_t x;
     uint16_t y;
@@ -172,41 +177,37 @@ void gl_draw_button(float x, float y, float width, float height, float radius, i
 
 void gl_draw_char(float x, float y, float width, float height) {
 
-    Vec2 uv1;
-    Vec2 uv2;
-    Vec2 uv3;
-    Vec2 uv4;
+    int ascii_value = 65;//A 
 
-    float char_value = 8;
-    
-    float center = 0.f;
+    int char_x = ascii_value%16;
+    int char_y = floor(ascii_value/16);
 
-    float tiling_x = 16.f/512;
-    float tiling_y = 32.f/512;
+    float char_size_x = 32.f/512.f;
+    float char_size_y = 32.f/512.f;
 
-    float minX = ((char_value*8)) /512;
-    float minY = ((char_value*16)) / 512;
-    
-    float maxX = (char_value*16)/512;
-    float maxY = (char_value*32)/512;
 
-    minX = minX + tiling_x;
-    minY = minX + tiling_y;
+    UV uv1;
+    UV uv2;
+    UV uv3;
+    UV uv4;
 
-    maxX = maxX + tiling_x;
-    maxY = maxY + tiling_y;
+    //button left
+    uv1.x = (float)char_x*char_size_x;
+    uv1.y = (float)char_y*char_size_y;
 
-    uv1.x = minX;
-    uv1.y = minY;
+    //button right
+    uv2.x = (char_x+1)*char_size_x;
+    uv2.y = char_y*char_size_y;
 
-    uv2.x = maxX;
-    uv2.y = minY;
 
-    uv3.x = maxX;
-    uv3.y = maxY;
+    //top right
+    uv3.x = (char_x+1)*char_size_x;
+    uv3.y = (char_y+1)*char_size_y;
 
-    uv4.x = minX;
-    uv4.y = maxY;
+
+    //top left
+    uv4.x = char_x*char_size_x;
+    uv4.y = (char_y+1)*char_size_y;
 
 
     glBindTexture(GL_TEXTURE_2D, font_texture_id);
@@ -454,8 +455,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
       
-        gl_draw_button2(50,50,400,400,1,1,1);
-        //gl_draw_char(50,50,400,400);
+        //gl_draw_button2(50,50,400,400,1,1,1);
+        gl_draw_char(50,50,400,400);
 
 
         int buttons_count = sizeof(buttons)/sizeof(Button);
