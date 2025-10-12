@@ -11,6 +11,9 @@
 #include <pthread.h>
 #include <math.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #define WINDOW_WIDTH 500
 #define WINDOW_HEIGHT 650
 
@@ -26,7 +29,9 @@ bool check_buttons_collision = false;
 
 XEvent window_event;
 
-    
+GLuint font_texture_id;
+
+
 int mouse_click_x = 0;
 int mouse_click_y = 0;
 
@@ -165,26 +170,94 @@ void gl_draw_button(float x, float y, float width, float height, float radius, i
 
 }
 
+void gl_draw_char(float x, float y, float width, float height) {
+
+    Vec2 uv1;
+    Vec2 uv2;
+    Vec2 uv3;
+    Vec2 uv4;
+
+    float char_value = 8;
+    
+    float center = 0.f;
+
+    float tiling_x = 16.f/512;
+    float tiling_y = 32.f/512;
+
+    float minX = ((char_value*8)) /512;
+    float minY = ((char_value*16)) / 512;
+    
+    float maxX = (char_value*16)/512;
+    float maxY = (char_value*32)/512;
+
+    minX = minX + tiling_x;
+    minY = minX + tiling_y;
+
+    maxX = maxX + tiling_x;
+    maxY = maxY + tiling_y;
+
+    uv1.x = minX;
+    uv1.y = minY;
+
+    uv2.x = maxX;
+    uv2.y = minY;
+
+    uv3.x = maxX;
+    uv3.y = maxY;
+
+    uv4.x = minX;
+    uv4.y = maxY;
+
+
+    glBindTexture(GL_TEXTURE_2D, font_texture_id);
+    
+    glEnable(GL_TEXTURE_2D);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(uv1.x, uv1.y);
+        glVertex2f(x, y);
+    glTexCoord2f(uv2.x, uv2.y);
+        glVertex2f(x + width, y);
+    glTexCoord2f(uv3.x, uv3.y);
+        glVertex2f(x + width, y + height);
+    glTexCoord2f(uv4.x, uv4.y);
+        glVertex2f(x, y + height);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
+}
 void gl_draw_button2(float x, float y, float width, float height, 
         float r, float g, float b) {
 
-    glColor3f(r, g, b); // Set button color
+    glBindTexture(GL_TEXTURE_2D, font_texture_id);
+    
+    glEnable(GL_TEXTURE_2D);
+
+    //glColor3f(r, g, b); // Set button color
     glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
         glVertex2f(x, y);
+    glTexCoord2f(1.0f, 0.0f);
         glVertex2f(x + width, y);
+    glTexCoord2f(1.0f, 1.0f);
         glVertex2f(x + width, y + height);
+    glTexCoord2f(0.0f, 1.0f);
         glVertex2f(x, y + height);
     glEnd();
 
-    // Draw border (optional)
-    glColor3f(0.0f, 0.0f, 0.0f); // Black border
-    glLineWidth(2.0f); // Border thickness
-    glBegin(GL_LINE_LOOP);
-        glVertex2f(x, y);
-        glVertex2f(x + width, y);
-        glVertex2f(x + width, y + height);
-        glVertex2f(x, y + height);
-    glEnd();
+    // // Draw border (optional)
+    // glColor3f(0.0f, 0.0f, 0.0f); // Black border
+    // glLineWidth(2.0f); // Border thickness
+    // glBegin(GL_LINE_LOOP);
+    //     glVertex2f(x, y);
+    //     glVertex2f(x + width, y);
+    //     glVertex2f(x + width, y + height);
+    //     glVertex2f(x, y + height);
+    // glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
 }
 
 void draw_button(Button* button){
@@ -227,6 +300,54 @@ void* handle_input(void* none){
               break;
         }
     }    
+}
+
+void gl_draw_image(){
+    glBindTexture(GL_TEXTURE_2D, font_texture_id);
+    
+    glEnable(GL_TEXTURE_2D);
+
+    // Drawing example (within a rendering loop)
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(-1.0f, -1.0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(1.0f, -1.0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(1.0f, 1.0f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(-1.0f, 1.0f);
+    glEnd();
+
+    // Disable texturing when done
+    glDisable(GL_TEXTURE_2D);
+}
+
+void load_texture(){
+
+    int width, height, channels;
+    unsigned char* image_data = stbi_load("images/font1.png",&width,&height,&channels,0);
+
+    
+    if(image_data){
+
+      glGenTextures(1, &font_texture_id);
+
+      glBindTexture(GL_TEXTURE_2D, font_texture_id);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                   GL_UNSIGNED_BYTE, image_data);
+
+      stbi_image_free(image_data);
+    }else{
+        printf("Can't load image texture: %s\n",stbi_failure_reason());
+    }
+
 }
 
 
@@ -297,6 +418,8 @@ int main() {
     XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask);
 
 
+
+
     init_opengl();
     
     pthread_t input_thread;
@@ -318,14 +441,23 @@ int main() {
     };
 
 
+    load_texture();   
+    
     while (prufus_window_running) {
 
 
-        glClearColor(246.0f/255.0f, 245.0f/255.0f, 244.0f/255.0f, 1.0f);
+        //glClearColor(246.0f/255.0f, 245.0f/255.0f, 244.0f/255.0f, 1.0f); //default color
+       
+        glClearColor(1,0,0,1);//test red
+
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
       
+        gl_draw_button2(50,50,400,400,1,1,1);
+        //gl_draw_char(50,50,400,400);
+
+
         int buttons_count = sizeof(buttons)/sizeof(Button);
 
         for(int i = 0; i < buttons_count; i++){
@@ -335,6 +467,7 @@ int main() {
             draw_button(&buttons[i]);
         }
 
+        //gl_draw_image();
 
 
 
