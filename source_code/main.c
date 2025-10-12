@@ -208,11 +208,15 @@ void gl_draw_char(float x, float y, float width, float height) {
     //top left
     uv4.x = char_x*char_size_x;
     uv4.y = (char_y+1)*char_size_y;
+    
+    float alpha_value = 0.f;
 
+    glEnable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindTexture(GL_TEXTURE_2D, font_texture_id);
-    
-    glEnable(GL_TEXTURE_2D);
 
     glBegin(GL_QUADS);
     glTexCoord2f(uv1.x, uv1.y);
@@ -226,6 +230,9 @@ void gl_draw_char(float x, float y, float width, float height) {
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
+    
+    glDisable(GL_BLEND);
+
 
 }
 void gl_draw_button2(float x, float y, float width, float height, 
@@ -336,13 +343,15 @@ void load_texture(){
 
       glBindTexture(GL_TEXTURE_2D, font_texture_id);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                    GL_UNSIGNED_BYTE, image_data);
+
 
       stbi_image_free(image_data);
     }else{
@@ -455,8 +464,6 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
       
-        //gl_draw_button2(50,50,400,400,1,1,1);
-        gl_draw_char(50,50,400,400);
 
 
         int buttons_count = sizeof(buttons)/sizeof(Button);
@@ -467,6 +474,9 @@ int main() {
             }
             draw_button(&buttons[i]);
         }
+        
+        //gl_draw_button2(50,50,400,400,1,1,1);
+        gl_draw_char(50,50,400,400);
 
         //gl_draw_image();
 
