@@ -14,6 +14,7 @@
 #include "user_interface/button.h"
 #include "user_interface/user_interface.h"
 
+#include "device.h"
 
 
 Button start_button;
@@ -23,9 +24,11 @@ Button close_button;
 
 
 int main() {
+    printf("Welcome to prufus\n");
 
     prufus_create_window();
 
+    read_sys_block();    
 
     init_opengl();
     
