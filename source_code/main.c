@@ -50,20 +50,6 @@ bool check_button_clicked(Button *button) {
 }
 
 
-void init_opengl(){
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-     // Example for a 2D projection where 0,0 is top-left and width,height is bottom-right
-    float left = 0.0f;
-    float right = (float)500; // Replace with your window's width
-    float bottom = (float)650; // Replace with your window's height
-    float top = 0.0f;
-    float near = -1.0f; // Near clipping plane
-    float far = 1.0f;   // Far clipping plane
-
-    glOrtho(left, right, bottom, top, near, far);
-
-}
 
 void draw_text(const char* text, float x, float y, int size) {
     int char_count = 0;
@@ -91,104 +77,6 @@ void button_new(Button* out, Vec2 position, Vec2 dimension){
     out->aabb.min.y = position.y;
     out->aabb.max.x = position.x + dimension.x;
     out->aabb.max.y = position.y + dimension.y;
-}
-void draw_border(float x, float y, float width, float height, float radius, int segments) {
-
-    glColor3f(211.f/255.f, 211.f/255.f, 211.f/255.f); 
-    glLineWidth(2.0f);
-    glBegin(GL_POLYGON);
-
-    // Top-right corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI_2 * i / segments; // 0 to 90 degrees
-        glVertex2f(x + width - radius + radius * cos(angle), y + height - radius + radius * sin(angle));
-    }
-    // Top-left corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI_2 + M_PI_2 * i / segments; // 90 to 180 degrees
-        glVertex2f(x + radius + radius * cos(angle), y + height - radius + radius * sin(angle));
-    }
-    // Bottom-left corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI + M_PI_2 * i / segments; // 180 to 270 degrees
-        glVertex2f(x + radius + radius * cos(angle), y + radius + radius * sin(angle));
-    }
-    // Bottom-right corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = 1.5f * M_PI + M_PI_2 * i / segments; // 270 to 360 degrees
-        glVertex2f(x + width - radius + radius * cos(angle), y + radius + radius * sin(angle));
-    }
-    glEnd();
-
-
-}
-
-void gl_draw_button(float x, float y, float width, float height, float radius, int segments) {
-    
-
-    draw_border(x-1,y-1,width+2,height+2,radius,segments);
-
-    glColor3f(1.f, 1.0f, 1.0f); // Black border
-    glLineWidth(10.0f); // Border thickness
-
-    glBegin(GL_POLYGON);
-
-    // Top-right corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI_2 * i / segments; // 0 to 90 degrees
-        glVertex2f(x + width - radius + radius * cos(angle), y + height - radius + radius * sin(angle));
-    }
-    // Top-left corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI_2 + M_PI_2 * i / segments; // 90 to 180 degrees
-        glVertex2f(x + radius + radius * cos(angle), y + height - radius + radius * sin(angle));
-    }
-    // Bottom-left corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI + M_PI_2 * i / segments; // 180 to 270 degrees
-        glVertex2f(x + radius + radius * cos(angle), y + radius + radius * sin(angle));
-    }
-    // Bottom-right corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = 1.5f * M_PI + M_PI_2 * i / segments; // 270 to 360 degrees
-        glVertex2f(x + width - radius + radius * cos(angle), y + radius + radius * sin(angle));
-    }
-    glEnd();
-
-
-}
-
-void draw_image(float x, float y, float width, float height, 
-        float r, float g, float b) {
-
-    glBindTexture(GL_TEXTURE_2D, font_texture_id);
-    
-    glEnable(GL_TEXTURE_2D);
-
-    //glColor3f(r, g, b); // Set button color
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-        glVertex2f(x, y);
-    glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(x + width, y);
-    glTexCoord2f(1.0f, 1.0f);
-        glVertex2f(x + width, y + height);
-    glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(x, y + height);
-    glEnd();
-
-    // // Draw border (optional)
-    // glColor3f(0.0f, 0.0f, 0.0f); // Black border
-    // glLineWidth(2.0f); // Border thickness
-    // glBegin(GL_LINE_LOOP);
-    //     glVertex2f(x, y);
-    //     glVertex2f(x + width, y);
-    //     glVertex2f(x + width, y + height);
-    //     glVertex2f(x, y + height);
-    // glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-
 }
 
 void draw_button(Button* button){
@@ -271,7 +159,9 @@ int main() {
 
 
     load_texture();   
-    
+
+    //This is the main rendering loop
+    //All the things happends here
     while (prufus_window_running) {
 
 

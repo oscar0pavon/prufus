@@ -8,4 +8,10 @@ extern GLuint font_texture_id;
 
 void gl_draw_char(char character, float x, float y, float width, float height);
 
+void init_opengl();
+
+void draw_border(float x, float y, float width, float height, float radius, int segments);
+
+void gl_draw_button(float x, float y, float width, float height, float radius, int segments);
+
 #endif
