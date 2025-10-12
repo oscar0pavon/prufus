@@ -1,4 +1,0 @@
-#!/bin/sh
-FILE_PATH="`readlink -f "$0"`"
-DIR="`dirname "$FILE_PATH"`"
-/usr/bin/pkexec env HOME=$HOME "$DIR$@"
