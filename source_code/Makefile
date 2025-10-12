@@ -3,15 +3,15 @@ CLINKS := -lX11 -lGL -lpthread -lm
 
 .PHONY: prufus
 
-OBJS := window.o
+OBJS := window.o opengl.o
 
 prufus: main.c $(OBJS)
 	cc $(CFLAGS) main.c $(OBJS) -o ../prufus $(CLINKS) -fdiagnostics-color=always
 
-user_interface.o: user_interface.c
-	cc $(CFLAGS) -c user_interface.c
-
 window.o: user_interface/window.c
+	cc $(CFLAGS) -c $<
+
+opengl.o: user_interface/opengl.c
 	cc $(CFLAGS) -c $<
 
 usb_validator.o: usb_validator.c
