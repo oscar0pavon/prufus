@@ -4,6 +4,7 @@
 #include <X11/Xutil.h>
 #include <GL/glx.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -47,6 +48,8 @@ typedef struct Vec2{
     uint16_t y;
 }Vec2;
 
+
+//Axis Aligned Bounding Box
 typedef struct AABB{
    Vec2 min;
    Vec2 max;
@@ -56,12 +59,76 @@ typedef struct Button{
     AABB aabb;
     Vec2 position;
     Vec2 dimention;
+    char text[50];
 
 }Button;
 
 Button start_button;
 Button close_button;
 
+void gl_draw_char(char character, float x, float y, float width, float height) {
+
+    int ascii_value = (int)character;
+
+    int char_x = ascii_value%16;
+    int char_y = floor(ascii_value/16);
+
+    float char_size_x = 32.f/512.f;
+    float char_size_y = 32.f/512.f;
+
+
+    UV uv1;
+    UV uv2;
+    UV uv3;
+    UV uv4;
+
+    //button left
+    uv1.x = (float)char_x*char_size_x;
+    uv1.y = (float)char_y*char_size_y;
+
+    //button right
+    uv2.x = (char_x+1)*char_size_x;
+    uv2.y = char_y*char_size_y;
+
+
+    //top right
+    uv3.x = (char_x+1)*char_size_x;
+    uv3.y = (char_y+1)*char_size_y;
+
+
+    //top left
+    uv4.x = char_x*char_size_x;
+    uv4.y = (char_y+1)*char_size_y;
+    
+    float alpha_value = 0.f;
+
+    glEnable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindTexture(GL_TEXTURE_2D, font_texture_id);
+
+    float gray = 0.25;
+    glColor3f(gray, gray, gray); 
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(uv1.x, uv1.y);
+        glVertex2f(x, y);
+    glTexCoord2f(uv2.x, uv2.y);
+        glVertex2f(x + width, y);
+    glTexCoord2f(uv3.x, uv3.y);
+        glVertex2f(x + width, y + height);
+    glTexCoord2f(uv4.x, uv4.y);
+        glVertex2f(x, y + height);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+    
+    glDisable(GL_BLEND);
+
+
+}
 
 bool check_button_clicked(Button *button) {
 
@@ -97,6 +164,23 @@ void init_opengl(){
 
     glOrtho(left, right, bottom, top, near, far);
 
+}
+
+void draw_text(const char* text, float x, float y, int size) {
+    int char_count = 0;
+
+    for (int i = 0; text[i] != '\0'; ++i) {
+        char_count++;
+    }
+
+    float current_x = x;
+
+    // y = y-14;//offset
+
+    for (int i = 0; text[i] != '\0'; ++i) {
+        gl_draw_char(text[i], current_x, y,size,size);
+        current_x += 10; // this the kerner (space betwen characters)
+    }
 }
 
 void button_new(Button* out, Vec2 position, Vec2 dimension){
@@ -175,67 +259,7 @@ void gl_draw_button(float x, float y, float width, float height, float radius, i
 
 }
 
-void gl_draw_char(float x, float y, float width, float height) {
-
-    int ascii_value = 65;//A 
-
-    int char_x = ascii_value%16;
-    int char_y = floor(ascii_value/16);
-
-    float char_size_x = 32.f/512.f;
-    float char_size_y = 32.f/512.f;
-
-
-    UV uv1;
-    UV uv2;
-    UV uv3;
-    UV uv4;
-
-    //button left
-    uv1.x = (float)char_x*char_size_x;
-    uv1.y = (float)char_y*char_size_y;
-
-    //button right
-    uv2.x = (char_x+1)*char_size_x;
-    uv2.y = char_y*char_size_y;
-
-
-    //top right
-    uv3.x = (char_x+1)*char_size_x;
-    uv3.y = (char_y+1)*char_size_y;
-
-
-    //top left
-    uv4.x = char_x*char_size_x;
-    uv4.y = (char_y+1)*char_size_y;
-    
-    float alpha_value = 0.f;
-
-    glEnable(GL_BLEND);
-    glEnable(GL_TEXTURE_2D);
-    
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBindTexture(GL_TEXTURE_2D, font_texture_id);
-
-    glBegin(GL_QUADS);
-    glTexCoord2f(uv1.x, uv1.y);
-        glVertex2f(x, y);
-    glTexCoord2f(uv2.x, uv2.y);
-        glVertex2f(x + width, y);
-    glTexCoord2f(uv3.x, uv3.y);
-        glVertex2f(x + width, y + height);
-    glTexCoord2f(uv4.x, uv4.y);
-        glVertex2f(x, y + height);
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    
-    glDisable(GL_BLEND);
-
-
-}
-void gl_draw_button2(float x, float y, float width, float height, 
+void draw_image(float x, float y, float width, float height, 
         float r, float g, float b) {
 
     glBindTexture(GL_TEXTURE_2D, font_texture_id);
@@ -273,6 +297,16 @@ void draw_button(Button* button){
     gl_draw_button(button->position.x, button->position.y,
             button->dimention.x, button->dimention.y,
             3, 2);
+
+    Vec2 center_x;
+    center_x.x = button->position.x+5;//offset TODO
+    center_x.y = button->position.y + button->dimention.y/2;
+    center_x.y = center_x.y - 10;//offset for center in Y
+
+
+    draw_text(button->text,center_x.x, center_x.y,24);
+
+    
 }
 
 void* handle_input(void* none){
@@ -310,27 +344,6 @@ void* handle_input(void* none){
     }    
 }
 
-void gl_draw_image(){
-    glBindTexture(GL_TEXTURE_2D, font_texture_id);
-    
-    glEnable(GL_TEXTURE_2D);
-
-    // Drawing example (within a rendering loop)
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex2f(-1.0f, -1.0f);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex2f(1.0f, -1.0f);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex2f(1.0f, 1.0f);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex2f(-1.0f, 1.0f);
-    glEnd();
-
-    // Disable texturing when done
-    glDisable(GL_TEXTURE_2D);
-}
-
 void load_texture(){
 
     int width, height, channels;
@@ -359,7 +372,6 @@ void load_texture(){
     }
 
 }
-
 
 
 int main() {
@@ -437,12 +449,17 @@ int main() {
     pthread_create(&input_thread,NULL,handle_input,NULL);
 
 
+    strcpy(start_button.text,"Start");
+    strcpy(close_button.text,"Close");
     button_new(&close_button, vec2(500-100,620-50), vec2(80,30) );
     button_new(&start_button, vec2(400-100,620-50), vec2(80,30) );
 
     Button select_button;
+    
+    strcpy(select_button.text,"Select");
 
-    button_new(&select_button, vec2(500-100,200-50), vec2(80,30) );
+
+    button_new(&select_button, vec2(500-100,200-40), vec2(80,30) );
 
     Button buttons[] = {
         start_button, 
@@ -456,9 +473,9 @@ int main() {
     while (prufus_window_running) {
 
 
-        //glClearColor(246.0f/255.0f, 245.0f/255.0f, 244.0f/255.0f, 1.0f); //default color
+        glClearColor(246.0f/255.0f, 245.0f/255.0f, 244.0f/255.0f, 1.0f); //default color
        
-        glClearColor(1,0,0,1);//test red
+        //glClearColor(1,0,0,1);//test red
 
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -475,10 +492,13 @@ int main() {
             draw_button(&buttons[i]);
         }
         
-        //gl_draw_button2(50,50,400,400,1,1,1);
-        gl_draw_char(50,50,400,400);
+        //draw_image(50,50,20,20,1,1,1);
 
-        //gl_draw_image();
+
+
+        draw_text("prufus",195,15,24);
+        draw_text("Device",0,80,24);
+        draw_text("Boot selection",0,140,24);
 
 
 
