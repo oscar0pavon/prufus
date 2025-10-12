@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+#define vec2(p1, p2)                                                           \
+  (Vec2) { p1, p2 }
+
+#define rgb(p1, p2, p3)                                                           \
+  (Vec3) { p1/255.0f, p2/255.0f, p3/255.0f }
+
+
 typedef struct UV{
     float x;
     float y;
