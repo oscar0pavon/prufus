@@ -27,11 +27,4 @@ typedef struct AABB{
    Vec2 max;
 } AABB;
 
-typedef struct Button{
-    AABB aabb;
-    Vec2 position;
-    Vec2 dimention;
-    char text[50];
-
-}Button;
 #endif

@@ -18,6 +18,25 @@ int mouse_click_y = 0;
 
 Window prufus_window; 
 
+void close_prufus_window(){
+    prufus_window_running = false;
+
+    XEvent event;
+    Atom wm_delete_window;
+
+    wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
+
+    event.xclient.type = ClientMessage;
+    event.xclient.window = prufus_window;
+    event.xclient.message_type = XInternAtom(display, "WM_PROTOCOLS", False);
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = wm_delete_window;
+    event.xclient.data.l[1] = CurrentTime;
+
+    XSendEvent(display, prufus_window, False, NoEventMask, &event);
+    XFlush(display); // Ensure the event is sent immediately
+}
+
 int prufus_create_window(){
 
     display = XOpenDisplay(NULL); // NULL for default display
@@ -103,8 +122,8 @@ void* handle_input(void* none){
                 }
                 break;
             case ButtonPress:
-                printf("Mouse clicked: %d , %d\n",window_event.xbutton.x,
-                        window_event.xbutton.y);
+                // printf("Mouse clicked: %d , %d\n",window_event.xbutton.x,
+                //         window_event.xbutton.y);
 
                 mouse_click_x = window_event.xbutton.x;
                 mouse_click_y = window_event.xbutton.y;

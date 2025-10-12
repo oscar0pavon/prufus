@@ -24,4 +24,6 @@ extern Window prufus_window;
 
 int prufus_create_window();
 
+void close_prufus_window();
+
 #endif

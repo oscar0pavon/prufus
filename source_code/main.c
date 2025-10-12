@@ -39,6 +39,8 @@ int main() {
 
     strcpy(start_button.text,"Start");
     strcpy(close_button.text,"Close");
+    close_button.execute = &close_prufus_window;
+
     button_new(&close_button, vec2(500-100,620-50), vec2(80,30) );
     button_new(&start_button, vec2(400-100,620-50), vec2(80,30) );
 
@@ -77,7 +79,9 @@ int main() {
 
         for(int i = 0; i < buttons_count; i++){
             if(check_button_clicked(&buttons[i])){
-                printf("Button clicked!\n");
+                if(buttons[i].execute != NULL){
+                    buttons[i].execute();
+                }
             }
             draw_button(&buttons[i]);
         }
