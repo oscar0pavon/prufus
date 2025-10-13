@@ -23,6 +23,13 @@ https://github.com/oscar0pavon/prufus/tree/v0.1
 sudo apt install wimtools
 ```
 # Build
+If you use Ubuntu, install build tools, libraries and headers:
+```
+sudo apt install build-essential
+sudo apt install libx11-dev
+sudo apt install libgl1-mesa-dev
+sudo apt install git
+```
 
 ```
 git clone https://github.com/oscarpavon/prufus
@@ -30,18 +37,6 @@ cd prufus
 make
 ```
 
-# Install
-```
-sudo make install
-```
-This will install the program, the program launcher, the icon and create a ".desktop" in your Desktop
-
-# Distributable
-We use an installer for distribute prufus, this installer can install the dependencies for your GNU/Linux distribution
-```
-make distributable
-```
-For generate the "prufus_installer.zip"
 
 
 # Warning
