@@ -4,12 +4,15 @@ CLINKS := -lX11 -lGL -lpthread -lm
 
 .PHONY: prufus
 
-OBJS := window.o opengl.o user_interface.o button.o device.o
+OBJS := window.o opengl.o user_interface.o button.o device.o lodepng.o
 
 prufus: main.c $(OBJS)
 	cc $(CFLAGS) main.c $(OBJS) -o ../prufus $(CLINKS) 
 
 window.o: user_interface/window.c
+	cc $(CFLAGS) -c $<
+
+lodepng.o: user_interface/lodepng.c
 	cc $(CFLAGS) -c $<
 
 user_interface.o: user_interface/user_interface.c

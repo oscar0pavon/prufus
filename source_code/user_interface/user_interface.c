@@ -4,6 +4,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "lodepng.h"
+
 
 void draw_text(const char* text, float x, float y, int size) {
     int char_count = 0;
@@ -26,11 +28,16 @@ void draw_text(const char* text, float x, float y, int size) {
 
 void load_texture(){
 
-    int width, height, channels;
-    unsigned char* image_data = stbi_load("images/font1.png",&width,&height,&channels,0);
+    unsigned int width, height, channels;
+    unsigned char* image_data = NULL; 
+
+
+    unsigned int error = lodepng_decode32_file(&image_data,&width,&height,"images/font1.png");
 
     
-    if(image_data){
+
+    
+    if(image_data && !error){
 
       glGenTextures(1, &font_texture_id);
 
@@ -46,7 +53,7 @@ void load_texture(){
                    GL_UNSIGNED_BYTE, image_data);
 
 
-      stbi_image_free(image_data);
+      free(image_data);
     }else{
         printf("Can't load image texture: %s\n",stbi_failure_reason());
     }
