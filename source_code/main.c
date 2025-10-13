@@ -48,6 +48,7 @@ int main() {
     
     strcpy(select_button.text,"Select");
 
+    select_button.execute = &create_select_file_window;
 
     button_new(&select_button, vec2(500-100,200-40), vec2(80,30) );
 

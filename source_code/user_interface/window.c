@@ -1,4 +1,5 @@
 #include "window.h"
+#include <X11/X.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -17,6 +18,44 @@ int mouse_click_x = 0;
 int mouse_click_y = 0;
 
 Window prufus_window; 
+Window select_file_window;
+
+XSetWindowAttributes window_attributes;
+
+Colormap color_map;
+
+GLXContext prufus_gl;
+
+Atom atom_close_window; 
+
+static int gl_attributes[] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
+
+XVisualInfo *window_visual;
+
+
+
+void create_select_file_window(){
+
+    select_file_window = XCreateWindow(display, RootWindow(display, window_visual->screen),
+            0, 0, 800, 600, 0, 
+            window_visual->depth, InputOutput, window_visual->visual, 
+            CWBorderPixel | CWColormap | CWEventMask, &window_attributes);
+    
+    Atom close_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display, select_file_window, &close_window, 1);
+    
+    //set window name 
+    XClassHint class_hint;
+    class_hint.res_name = "prufus";
+    class_hint.res_class = "prufus"; 
+    XSetClassHint(display, select_file_window, &class_hint);
+
+    XSetStandardProperties(display, select_file_window, 
+            "prufus", "prufus", None, NULL, 0, NULL);
+
+    XMapWindow(display, select_file_window);
+    
+}
 
 void close_prufus_window(){
     prufus_window_running = false;
@@ -45,28 +84,21 @@ int prufus_create_window(){
         return 1;
     }
 
-    int screen = DefaultScreen(display);
-    Window root_window = DefaultRootWindow(display);
 
-    static int attributes[] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
-    XVisualInfo *window_visual = glXChooseVisual(display, DefaultScreen(display), attributes);
+    window_visual = glXChooseVisual(display, DefaultScreen(display), gl_attributes);
     if (window_visual== NULL) {
         // Handle error
     }
 
-    Colormap cmap = XCreateColormap(display, 
+    color_map = XCreateColormap(display, 
             RootWindow(display, window_visual->screen), window_visual->visual, AllocNone);
 
 
-    XSetWindowAttributes window_attributes;
-    window_attributes.colormap = cmap;
+    window_attributes.colormap = color_map;
     window_attributes.border_pixel = 0;
     window_attributes.event_mask =
         ExposureMask | KeyPressMask | StructureNotifyMask;
 
-    XClassHint class_hint;
-    class_hint.res_name = "prufus";
-    class_hint.res_class = "prufus"; 
 
 
     prufus_window = XCreateWindow(display, RootWindow(display, window_visual->screen),
@@ -74,10 +106,16 @@ int prufus_create_window(){
             window_visual->depth, InputOutput, window_visual->visual, 
             CWBorderPixel | CWColormap | CWEventMask, &window_attributes);
 
+    //set window name 
+    XClassHint class_hint;
+    class_hint.res_name = "prufus";
+    class_hint.res_class = "prufus"; 
     XSetClassHint(display, prufus_window, &class_hint);
+
     XSetStandardProperties(display, prufus_window, 
             "prufus", "prufus", None, NULL, 0, NULL);
 
+    //prevent resizing
     XSizeHints hints;
     hints.flags = PMinSize | PMaxSize;
     hints.min_width = WINDOW_WIDTH;
@@ -87,21 +125,27 @@ int prufus_create_window(){
 
     XSetWMNormalHints(display,prufus_window,&hints);
 
-    // GL_TRUE for direct rendering
-    GLXContext cx = glXCreateContext(display, window_visual, None, GL_TRUE); 
-    if (cx == NULL) {
-        // Handle error
-    }
-    
-    Atom wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(display, prufus_window, &wm_delete_window, 1);
+   
+    //handle close the window
+    atom_close_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display, prufus_window, &atom_close_window, 1);
 
-    glXMakeCurrent(display, prufus_window, cx);
-
-    XMapWindow(display, prufus_window);
 
     XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask);
 
+
+    //OpenGL initialization
+    prufus_gl = glXCreateContext(display, window_visual, None, GL_TRUE); // GL_TRUE for direct rendering
+    if (prufus_gl == NULL) {
+        // Handle error
+        printf("Can't create OpenGL context\n");
+        return -1;
+    }
+    glXMakeCurrent(display, prufus_window, prufus_gl);
+    
+    
+    //show the window
+    XMapWindow(display, prufus_window);
 }
 
 void* handle_input(void* none){

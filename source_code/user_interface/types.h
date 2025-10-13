@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define vec2(p1, p2)                                                           \
   (Vec2) { p1, p2 }

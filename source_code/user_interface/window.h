@@ -26,4 +26,6 @@ int prufus_create_window();
 
 void close_prufus_window();
 
+void create_select_file_window();
+
 #endif
