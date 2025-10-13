@@ -4,6 +4,7 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <stdbool.h>
 
 #define WINDOW_WIDTH 500
 #define WINDOW_HEIGHT 650
