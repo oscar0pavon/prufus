@@ -1,9 +1,9 @@
 #include "user_interface.h"
 #include "opengl.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "lodepng.h"
 
 
@@ -55,7 +55,7 @@ void load_texture(){
 
       free(image_data);
     }else{
-        printf("Can't load image texture: %s\n",stbi_failure_reason());
+        printf("Can't load image texture\n");
     }
 
 }
