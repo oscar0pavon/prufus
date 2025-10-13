@@ -11,6 +11,8 @@
 #include "user_interface/window.h"
 #include "user_interface/opengl.h"
 
+#include "user_interface/select_window.h"
+
 #include "user_interface/button.h"
 #include "user_interface/user_interface.h"
 
@@ -61,19 +63,18 @@ int main() {
 
     load_texture();   
 
+    init_user_interface_data();
+
     //This is the main rendering loop
     //All the things happends here
     while (prufus_window_running) {
 
 
-        glClearColor(246.0f/255.0f, 245.0f/255.0f, 244.0f/255.0f, 1.0f); //default color
-       
-        //glClearColor(1,0,0,1);//test red
-
+        glXMakeCurrent(display, prufus_window, prufus_main_window_context);
+        
+        glClearColor(background_color.r, background_color.g,background_color.b, 1);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      
-      
 
 
         int buttons_count = sizeof(buttons)/sizeof(Button);
@@ -94,12 +95,15 @@ int main() {
         draw_text("prufus",195,15,24);
         draw_text("Device",0,80,24);
         draw_text("Boot selection",0,140,24);
-
-
-
+        
         glFlush();
         
         glXSwapBuffers(display, prufus_window);
+        
+        if(can_draw_select_window){
+            draw_select_window();
+        }
+
 
         usleep(50000.f);
     }

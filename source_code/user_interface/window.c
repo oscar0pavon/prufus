@@ -1,12 +1,7 @@
 #include "window.h"
-#include <X11/X.h>
-#include <X11/Xlib.h>
+#include "select_window.h"
+
 #include <stdio.h>
-#include <stdbool.h>
-
-
-#include <GL/gl.h>
-#include <GL/glx.h>
 
 bool prufus_window_running = true;
 
@@ -19,49 +14,19 @@ int mouse_click_x = 0;
 int mouse_click_y = 0;
 
 Window prufus_window; 
-Window select_file_window;
 
 XSetWindowAttributes window_attributes;
+XVisualInfo* window_visual;
 
 Colormap color_map;
 
-GLXContext prufus_gl;
+GLXContext prufus_main_window_context;
 
 Atom atom_close_window; 
 
-static int gl_attributes[] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
-
-XVisualInfo *window_visual;
+int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 
-
-void create_select_file_window(){
-
-    select_file_window = XCreateWindow(display, RootWindow(display, window_visual->screen),
-            0, 0, 800, 600, 0, 
-            window_visual->depth, InputOutput, window_visual->visual, 
-            CWBorderPixel | CWColormap | CWEventMask, &window_attributes);
-    
-    Atom close_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(display, select_file_window, &close_window, 1);
-    
-    //set window name 
-    XClassHint class_hint;
-    class_hint.res_name = "Select File - prufus";
-    class_hint.res_class = "Select File - prufus"; 
-    XSetClassHint(display, select_file_window, &class_hint);
-
-    XSetStandardProperties(display, select_file_window, 
-            "Select File - prufus", "Select File - prufus", None, NULL, 0, NULL);
-
-    XMapWindow(display, select_file_window);
-
-    XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask | FocusChangeMask);
-    
-    //XSetInputFocus(display, select_file_window, RevertToParent, CurrentTime);
-
-    
-}
 
 void hande_close_window(Window window){
 
@@ -147,14 +112,13 @@ int prufus_create_window(){
 
 
     //OpenGL initialization
-    prufus_gl = glXCreateContext(display, window_visual, None, GL_TRUE); // GL_TRUE for direct rendering
-    if (prufus_gl == NULL) {
-        // Handle error
+    prufus_main_window_context = glXCreateContext(display, window_visual, None, GL_TRUE); // GL_TRUE for direct rendering
+    if (prufus_main_window_context == NULL) {
         printf("Can't create OpenGL context\n");
         return -1;
     }
-    glXMakeCurrent(display, prufus_window, prufus_gl);
     
+    glXMakeCurrent(display, prufus_window, prufus_main_window_context);
     
     //show the window
     XMapWindow(display, prufus_window);
@@ -182,9 +146,11 @@ void* handle_input(void* none){
 
                     if(focused_window == prufus_window){
                         prufus_window_running = false;
+                    }else{//select window
+                        can_draw_select_window = false;
+                        XDestroyWindow(display,focused_window);
                     }
 
-                    XDestroyWindow(display,focused_window);
                 }
                 break;
             case ButtonPress:
@@ -203,14 +169,12 @@ void* handle_input(void* none){
               break;
 
             case FocusIn:
-                printf("focus in\n");
 
                XSetInputFocus(display, prufus_window, RevertToParent, CurrentTime);
               break;
 
             case FocusOut:
 
-                printf("focus out\n");
               break;
             }
     }    

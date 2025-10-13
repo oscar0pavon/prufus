@@ -6,6 +6,17 @@
 #include <stdio.h>
 #include "lodepng.h"
 
+#include "types.h"
+
+Color background_color;
+
+void init_user_interface_data(){
+  
+  background_color.r = rgb(246.f) ;
+  background_color.g = rgb(245.f);
+  background_color.b = rgb(244.f);
+
+}
 
 void draw_text(const char* text, float x, float y, int size) {
     int char_count = 0;

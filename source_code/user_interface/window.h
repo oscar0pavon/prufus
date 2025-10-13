@@ -5,6 +5,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <stdbool.h>
+#include <GL/gl.h>
+#include <GL/glx.h>
 
 #define WINDOW_WIDTH 500
 #define WINDOW_HEIGHT 650
@@ -22,6 +24,11 @@ extern int mouse_click_x;
 extern int mouse_click_y;
 
 extern Window prufus_window; 
+
+extern XSetWindowAttributes window_attributes;
+extern XVisualInfo* window_visual;
+
+extern GLXContext prufus_main_window_context;
 
 int prufus_create_window();
 
