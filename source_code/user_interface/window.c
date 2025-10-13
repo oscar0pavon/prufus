@@ -1,5 +1,6 @@
 #include "window.h"
 #include <X11/X.h>
+#include <X11/Xlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -46,19 +47,23 @@ void create_select_file_window(){
     
     //set window name 
     XClassHint class_hint;
-    class_hint.res_name = "prufus";
-    class_hint.res_class = "prufus"; 
+    class_hint.res_name = "Select File - prufus";
+    class_hint.res_class = "Select File - prufus"; 
     XSetClassHint(display, select_file_window, &class_hint);
 
     XSetStandardProperties(display, select_file_window, 
-            "prufus", "prufus", None, NULL, 0, NULL);
+            "Select File - prufus", "Select File - prufus", None, NULL, 0, NULL);
 
     XMapWindow(display, select_file_window);
+
+    XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask | FocusChangeMask);
+    
+    //XSetInputFocus(display, select_file_window, RevertToParent, CurrentTime);
+
     
 }
 
-void close_prufus_window(){
-    prufus_window_running = false;
+void hande_close_window(Window window){
 
     XEvent event;
     Atom wm_delete_window;
@@ -66,14 +71,21 @@ void close_prufus_window(){
     wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
 
     event.xclient.type = ClientMessage;
-    event.xclient.window = prufus_window;
+    event.xclient.window = window;
     event.xclient.message_type = XInternAtom(display, "WM_PROTOCOLS", False);
     event.xclient.format = 32;
     event.xclient.data.l[0] = wm_delete_window;
     event.xclient.data.l[1] = CurrentTime;
 
-    XSendEvent(display, prufus_window, False, NoEventMask, &event);
+    XSendEvent(display, window, False, NoEventMask, &event);
     XFlush(display); // Ensure the event is sent immediately
+}
+
+void close_prufus_window(){
+    prufus_window_running = false;
+
+    //hande_close_window(prufus_window);
+    XFlush(display);
 }
 
 int prufus_create_window(){
@@ -131,7 +143,7 @@ int prufus_create_window(){
     XSetWMProtocols(display, prufus_window, &atom_close_window, 1);
 
 
-    XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask);
+    XSelectInput(display, prufus_window, ButtonPressMask | ButtonReleaseMask | FocusChangeMask);
 
 
     //OpenGL initialization
@@ -146,6 +158,7 @@ int prufus_create_window(){
     
     //show the window
     XMapWindow(display, prufus_window);
+
 }
 
 void* handle_input(void* none){
@@ -162,7 +175,16 @@ void* handle_input(void* none){
                     (Atom)window_event.xclient.data.l[0] == 
                     XInternAtom(display, "WM_DELETE_WINDOW", False)) {
                     // or prompt the user for confirmation
-                    prufus_window_running = false; 
+
+                    int revert_to;
+                    Window focused_window;
+                    XGetInputFocus(display,&focused_window,&revert_to);
+
+                    if(focused_window == prufus_window){
+                        prufus_window_running = false;
+                    }
+
+                    XDestroyWindow(display,focused_window);
                 }
                 break;
             case ButtonPress:
@@ -179,6 +201,17 @@ void* handle_input(void* none){
 
 
               break;
-        }
+
+            case FocusIn:
+                printf("focus in\n");
+
+               XSetInputFocus(display, prufus_window, RevertToParent, CurrentTime);
+              break;
+
+            case FocusOut:
+
+                printf("focus out\n");
+              break;
+            }
     }    
 }

@@ -4,26 +4,6 @@
 prufus:
 	make -C source_code
 
-installer:
-	make -C source_code/installer
-
-distributable_directory:
-	mkdir -vp distributable/prufus_installer/prufus/scripts
-	mkdir -vp distributable/prufus_installer/installer
-
-distributable: distributable_directory prufus installer
-	cp prufus ./distributable/prufus_installer/prufus/prufus
-	cp -vr scripts ./distributable/prufus_installer/prufus/
-	cp -v icon/icon.png ./distributable/prufus_installer/prufus
-	cp -v prufus.desktop ./distributable/prufus_installer/prufus/prufus.desktop
-	cp ./source_code/installer/setup ./distributable/prufus_installer/
-	cp ./source_code/installer/graphics_sudo ./distributable/prufus_installer/installer/
-	cp ./source_code/installer/install.sh ./distributable/prufus_installer/installer/
-	cp ./source_code/installer/prepare.sh ./distributable/prufus_installer/installer/
-	cp ./logo.png ./distributable/prufus_installer/installer
-	cd ./distributable/ && zip -r prufus_installer.zip ./prufus_installer/
-
-
 install:
 	cp prufus /usr/bin/
 	cp ./scripts/prufus.sh /usr/bin/
@@ -46,5 +26,4 @@ uninstall:
 
 clean:
 	make -C source_code clean
-	make -C source_code/installer clean
 	rm -f prufus
