@@ -1,4 +1,4 @@
-CFLAGS := -I/usr/include -fdiagnostics-color=always
+CFLAGS := -I/usr/include -fdiagnostics-color=always -g
 
 CLINKS := -lX11 -lGL -lpthread -lm
 

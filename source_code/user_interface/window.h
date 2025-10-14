@@ -34,4 +34,8 @@ void close_prufus_window();
 
 void create_select_file_window();
 
+void hande_close_window(Window window);
+
+int handle_x_error(Display *display, XErrorEvent *error);
+
 #endif

@@ -28,8 +28,10 @@ Button close_button;
 
 int main() {
     printf("Welcome to prufus\n");
-
+    XInitThreads();
     prufus_create_window();
+
+    XSetErrorHandler(handle_x_error);
 
     read_sys_block();    
 

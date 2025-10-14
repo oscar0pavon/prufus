@@ -27,6 +27,14 @@ Atom atom_close_window;
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 
+int handle_x_error(Display *display, XErrorEvent *error) {
+    char buffer[256];
+    XGetErrorText(display, error->error_code, buffer, sizeof(buffer));
+    fprintf(stderr, "X Error: %s\n", buffer);
+    // Breakpoint here
+    return 0;
+}
+
 
 void hande_close_window(Window window){
 
@@ -50,7 +58,6 @@ void close_prufus_window(){
     prufus_window_running = false;
 
     //hande_close_window(prufus_window);
-    XFlush(display);
 }
 
 int prufus_create_window(){
@@ -60,7 +67,7 @@ int prufus_create_window(){
         // Handle error
         return 1;
     }
-
+    
 
     window_visual = glXChooseVisual(display, DefaultScreen(display), gl_attributes);
     if (window_visual== NULL) {

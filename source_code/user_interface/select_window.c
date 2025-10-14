@@ -7,6 +7,7 @@
 #include "user_interface.h"
 #include "button.h"
 #include <string.h>
+#include <unistd.h>
 
 #include "opengl.h"
 
@@ -23,8 +24,8 @@ Button open_select_window;
 Button cancel_select_window;
 
 void close_select_window(){
-  can_draw_select_window = false;
-  XDestroyWindow(display, select_file_window);
+
+  hande_close_window(select_file_window);
 }
 
 
