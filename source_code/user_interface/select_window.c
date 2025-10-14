@@ -11,6 +11,9 @@
 
 #include "opengl.h"
 
+#include <dirent.h>
+#include <sys/types.h>
+
 #define SELECT_WINDOW_WIDTH 855
 #define SELECT_WINDOW_HEIGHT 780
 
@@ -22,6 +25,36 @@ GLXContext select_window_context;
 
 Button open_select_window;
 Button cancel_select_window;
+
+
+void draw_directory(){
+    DIR *directory;
+    struct dirent *entry;
+
+    directory = opendir("/root/");
+
+
+    int entries_count = 0;
+    while((entry = readdir(directory)) != NULL){
+      // Skip . and .. directories
+      if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+        continue;
+      }
+
+      if(entry->d_name[0] == '.')
+        continue;
+
+      if (entries_count >= 12)
+        break;
+
+      entries_count++;
+
+      draw_text(entry->d_name, 50, 50+(entries_count*25), 25);
+    }
+
+    closedir(directory);
+}
+
 
 void close_select_window(){
 
@@ -51,6 +84,8 @@ void draw_select_window(){
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+  draw_directory();
 
   Button buttons[] = {
       cancel_select_window,
