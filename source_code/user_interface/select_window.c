@@ -30,10 +30,10 @@ void close_select_window(){
 
 void init_select_window(){
     
-    strcpy(cancel_select_window.text,"Close");
+    strcpy(cancel_select_window.text,"Cancel");
     cancel_select_window.execute = &close_select_window;
 
-    button_new(&cancel_select_window, vec2(50,50), vec2(150,80) );
+    button_new(&cancel_select_window, vec2(SELECT_WINDOW_WIDTH-100,SELECT_WINDOW_HEIGHT-90), vec2(80,30) );
 }
 
 
@@ -41,6 +41,9 @@ void draw_select_window(){
 
   glXMakeCurrent(display, select_file_window, select_window_context);
   
+  
+  glViewport(0, 0, SELECT_WINDOW_WIDTH, SELECT_WINDOW_HEIGHT);
+
   set_ortho_projection(SELECT_WINDOW_WIDTH,SELECT_WINDOW_HEIGHT);
 
   glClearColor(background_color.r, background_color.g, background_color.b, 1);

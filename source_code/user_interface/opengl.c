@@ -8,6 +8,7 @@ GLuint font_texture_id;
 
 void set_ortho_projection(float width, float height){
 
+
     glLoadIdentity();
 
     //2D projection where 0,0 is top-left and width,height is bottom-right
@@ -54,6 +55,7 @@ void draw_border(float x, float y, float width, float height, float radius, int 
 
 
 }
+
 
 void gl_draw_button(float x, float y, float width, float height, float radius, int segments) {
     

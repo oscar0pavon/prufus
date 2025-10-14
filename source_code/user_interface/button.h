@@ -18,6 +18,7 @@ void button_new(Button* out, Vec2 position, Vec2 dimension);
 
 void draw_button(Button* button);
 
+void draw_button_select_window(Button* button);
 
 
 #endif

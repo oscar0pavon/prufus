@@ -38,6 +38,7 @@ void button_new(Button* out, Vec2 position, Vec2 dimension){
     out->aabb.max.y = position.y + dimension.y;
 }
 
+
 void draw_button(Button* button){
 
 

@@ -65,12 +65,16 @@ int main() {
 
     init_user_interface_data();
 
+    create_select_file_window();
+
     //This is the main rendering loop
     //All the things happends here
     while (prufus_window_running) {
 
 
         glXMakeCurrent(display, prufus_window, prufus_main_window_context);
+  
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         
         glClearColor(background_color.r, background_color.g,background_color.b, 1);
 

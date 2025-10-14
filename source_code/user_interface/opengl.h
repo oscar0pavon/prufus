@@ -14,6 +14,8 @@ void draw_border(float x, float y, float width, float height, float radius, int 
 
 void gl_draw_button(float x, float y, float width, float height, float radius, int segments);
 
+void gl_draw_button_select_window(float x, float y, float width, float height, float radius, int segments);
+
 void set_ortho_projection(float width, float height);
 
 #endif
