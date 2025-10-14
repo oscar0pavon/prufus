@@ -33,7 +33,7 @@ void init_select_window(){
     strcpy(cancel_select_window.text,"Close");
     cancel_select_window.execute = &close_select_window;
 
-    button_new(&cancel_select_window, vec2(50,50), vec2(80,30) );
+    button_new(&cancel_select_window, vec2(50,50), vec2(100,50) );
 }
 
 

@@ -145,10 +145,11 @@ void* handle_input(void* none){
                     XGetInputFocus(display,&focused_window,&revert_to);
 
                     if(focused_window == prufus_window){
-                        prufus_window_running = false;
-                    }else{//select window
+                         prufus_window_running = false;
+                    }
+                    if(focused_window == select_file_window){
                         can_draw_select_window = false;
-                        XDestroyWindow(display,focused_window);
+                        XDestroyWindow(display,select_file_window);
                     }
 
                 }
@@ -170,7 +171,7 @@ void* handle_input(void* none){
 
             case FocusIn:
 
-               XSetInputFocus(display, prufus_window, RevertToParent, CurrentTime);
+               //XSetInputFocus(display, prufus_window, RevertToParent, CurrentTime);
               break;
 
             case FocusOut:
