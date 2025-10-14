@@ -2,12 +2,11 @@
 #include "types.h"
 #include "math.h"
 #include "window.h"
+#include <GL/gl.h>
 
 GLuint font_texture_id;
 
 void set_ortho_projection(float width, float height){
-
-    glMatrixMode(GL_PROJECTION);
 
     glLoadIdentity();
 
@@ -20,6 +19,7 @@ void set_ortho_projection(float width, float height){
     float far = 1.0f;   // Far clipping plane
 
     glOrtho(left, right, bottom, top, near, far);
+
 }
 
 void init_opengl(){
@@ -28,8 +28,6 @@ void init_opengl(){
 
 void draw_border(float x, float y, float width, float height, float radius, int segments) {
 
-    glColor3f(211.f/255.f, 211.f/255.f, 211.f/255.f); 
-    glLineWidth(2.0f);
     glBegin(GL_POLYGON);
 
     // Top-right corner
@@ -60,34 +58,12 @@ void draw_border(float x, float y, float width, float height, float radius, int 
 void gl_draw_button(float x, float y, float width, float height, float radius, int segments) {
     
 
+    glColor3f(211.f/255.f, 211.f/255.f, 211.f/255.f); 
     draw_border(x-1,y-1,width+2,height+2,radius,segments);
 
     glColor3f(1.f, 1.0f, 1.0f); // Black border
-    glLineWidth(10.0f); // Border thickness
 
-    glBegin(GL_POLYGON);
-
-    // Top-right corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI_2 * i / segments; // 0 to 90 degrees
-        glVertex2f(x + width - radius + radius * cos(angle), y + height - radius + radius * sin(angle));
-    }
-    // Top-left corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI_2 + M_PI_2 * i / segments; // 90 to 180 degrees
-        glVertex2f(x + radius + radius * cos(angle), y + height - radius + radius * sin(angle));
-    }
-    // Bottom-left corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = M_PI + M_PI_2 * i / segments; // 180 to 270 degrees
-        glVertex2f(x + radius + radius * cos(angle), y + radius + radius * sin(angle));
-    }
-    // Bottom-right corner
-    for (int i = 0; i <= segments; ++i) {
-        float angle = 1.5f * M_PI + M_PI_2 * i / segments; // 270 to 360 degrees
-        glVertex2f(x + width - radius + radius * cos(angle), y + radius + radius * sin(angle));
-    }
-    glEnd();
+    draw_border(x,y,width,height,radius,segments);
 
 
 }

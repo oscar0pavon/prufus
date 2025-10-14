@@ -97,7 +97,7 @@ int main() {
         draw_text("Device",0,80,24);
         draw_text("Boot selection",0,140,24);
         
-        glFlush();
+        //glFlush();
         
         glXSwapBuffers(display, prufus_window);
         

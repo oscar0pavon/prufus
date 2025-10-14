@@ -2,6 +2,7 @@
 #include "opengl.h"
 #include <stdbool.h>
 
+#include "select_window.h"
 #include "window.h"
 
 #include "user_interface.h"
@@ -38,6 +39,7 @@ void button_new(Button* out, Vec2 position, Vec2 dimension){
 }
 
 void draw_button(Button* button){
+
 
     gl_draw_button(button->position.x, button->position.y,
             button->dimention.x, button->dimention.y,
