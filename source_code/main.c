@@ -76,6 +76,7 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        set_ortho_projection(WINDOW_WIDTH,WINDOW_HEIGHT);
 
         int buttons_count = sizeof(buttons)/sizeof(Button);
 

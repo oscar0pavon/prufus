@@ -1,22 +1,29 @@
 #include "opengl.h"
 #include "types.h"
 #include "math.h"
+#include "window.h"
 
 GLuint font_texture_id;
 
-void init_opengl(){
+void set_ortho_projection(float width, float height){
+
     glMatrixMode(GL_PROJECTION);
+
     glLoadIdentity();
-     // Example for a 2D projection where 0,0 is top-left and width,height is bottom-right
+
+    //2D projection where 0,0 is top-left and width,height is bottom-right
     float left = 0.0f;
-    float right = (float)500; // Replace with your window's width
-    float bottom = (float)650; // Replace with your window's height
+    float right = (float)width; //window's width
+    float bottom = (float)height; //window's height
     float top = 0.0f;
     float near = -1.0f; // Near clipping plane
     float far = 1.0f;   // Far clipping plane
 
     glOrtho(left, right, bottom, top, near, far);
+}
 
+void init_opengl(){
+    set_ortho_projection(WINDOW_WIDTH,WINDOW_HEIGHT);
 }
 
 void draw_border(float x, float y, float width, float height, float radius, int segments) {
