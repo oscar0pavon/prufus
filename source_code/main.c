@@ -14,6 +14,7 @@
 #include "user_interface/select_window.h"
 
 #include "user_interface/button.h"
+#include "user_interface/input.h"
 #include "user_interface/user_interface.h"
 
 #include "device.h"

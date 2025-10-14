@@ -15,8 +15,6 @@ extern Display* display;
 
 extern XEvent window_event;
 
-void* handle_input(void* none);
-
 extern bool prufus_window_running;
 extern bool check_buttons_collision;
 
