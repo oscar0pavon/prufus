@@ -54,6 +54,13 @@ void* handle_input(void* none){
         mouse_click_x = window_event.xbutton.x;
         mouse_click_y = window_event.xbutton.y;
 
+        if(window_event.xbutton.button == 4){//scroll up
+          mouse_wheel_up = 1; 
+        }
+        if(window_event.xbutton.button == 5){//scroll down
+          mouse_wheel_down = 1;
+        }
+
         break;
 
       case ButtonRelease:

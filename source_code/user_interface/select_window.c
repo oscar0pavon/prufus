@@ -44,9 +44,19 @@ int number_of_entries = 0;
 
 bool can_read_directory = true;
 
+int current_scroll_position = 0;
+
+struct dirent** valid_files_list;
+struct dirent* valid_files_mem;
+
+int valid_files_count = 0;
+
 
 
 void list_directory(const char* path){
+
+  printf("List directory: %s\n", path);
+
   number_of_entries = scandir(path,&files_list,0,alphasort);
 
   if( number_of_entries < 0 ){
@@ -55,6 +65,37 @@ void list_directory(const char* path){
    printf("Directory count: %i\n",number_of_entries); 
   }
 
+  int valid = 0;
+  for (int i = 0; i < number_of_entries; i++) {
+
+    if (files_list[i]->d_name[0] == '.')
+      continue;
+
+    valid++;
+  }
+
+  valid_files_count = valid;
+
+    
+  struct dirent* test;
+
+
+    valid_files_list = malloc(valid_files_count*sizeof(struct dirent*));
+
+
+   
+    int local_valid_files_count = 0;
+    for(int i = 0 ; i < number_of_entries; i++){
+
+      if(files_list[i]->d_name[0] == '.')
+        continue;
+      
+      valid_files_list[local_valid_files_count] =  files_list[i];
+        local_valid_files_count++;
+    }
+
+
+    printf("valid files %i\n", valid_files_count);
 }
 
 void draw_directory(){
@@ -77,16 +118,27 @@ void draw_directory(){
     }
 
     
+
+    if(mouse_wheel_up >= 1){
+      current_scroll_position++;
+    }
+    
+    if(mouse_wheel_down >= 1){
+      if(current_scroll_position > 0){
+        current_scroll_position--;
+      }
+    }
+
+    int current_file_name = current_scroll_position;
+
+
     int current_entry_count = 0;
-    for(int i = 0; i < number_of_entries; i++){
 
-
-
-      if(files_list[i]->d_name[0] == '.')
-        continue;
+    for( ; current_file_name < valid_files_count; current_file_name++){
 
       if (current_entry_count >= ENTRIES_COUNT)
         break;
+
 
       int position_y = 50+(current_entry_count*25);
 
@@ -97,8 +149,9 @@ void draw_directory(){
 
       button_new(&select_files_entries[current_entry_count], (Vec2){file_info_position_x, position_y}, (Vec2){400,25});
 
-
-      draw_text(files_list[i]->d_name, file_info_position_x, position_y, 25);
+      // printf("current file number: %i\n",current_file_name);
+      // printf("valid files: %i\n",valid_files_count);
+      draw_text(valid_files_list[current_file_name]->d_name, file_info_position_x, position_y, 25);
 
       current_entry_count++;
 
@@ -138,6 +191,8 @@ void free_select_window(){
 
   free(files_list);
 
+  free(valid_files_list);
+
   can_read_directory = true;
 
   printf("Cleaned directory list\n");
@@ -162,6 +217,8 @@ void init_select_window(){
     for(int i = 0; i < ENTRIES_COUNT;i++){
       select_files_entries[i].selected = false;
     }
+
+    valid_files_count = 0;
 }
 
 

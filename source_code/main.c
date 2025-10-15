@@ -73,6 +73,7 @@ int main() {
     //This is the main rendering loop
     //All the things happends here
     while (prufus_window_running) {
+        
 
 
         glXMakeCurrent(display, prufus_window, prufus_main_window_context);
@@ -112,6 +113,9 @@ int main() {
             draw_select_window();
         }
 
+
+        mouse_wheel_up = 0;
+        mouse_wheel_down = 0;
 
         usleep(50000.f);
     }

@@ -21,6 +21,9 @@ extern bool check_buttons_collision;
 extern int mouse_click_x;
 extern int mouse_click_y;
 
+extern int mouse_wheel_up;
+extern int mouse_wheel_down;
+
 extern Window prufus_window; 
 
 extern XSetWindowAttributes window_attributes;

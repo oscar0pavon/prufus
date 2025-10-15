@@ -13,6 +13,9 @@ XEvent window_event;
 int mouse_click_x = 0;
 int mouse_click_y = 0;
 
+int mouse_wheel_up = 0;
+int mouse_wheel_down = 0;
+
 Window prufus_window; 
 
 XSetWindowAttributes window_attributes;
