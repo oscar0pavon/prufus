@@ -29,10 +29,10 @@ Button open_select_window;
 Button cancel_select_window;
 
 
-int file_info_position_x = 50;
+int file_info_position_x = 150;
 
 
-#define ENTRIES_COUNT 10
+#define ENTRIES_COUNT 25
 
 int select_file_current_entry = 0;
 
@@ -134,6 +134,8 @@ void draw_directory(){
 
     int current_entry_count = 0;
 
+
+
     for( ; current_file_name < valid_files_count; current_file_name++){
 
       if (current_entry_count >= ENTRIES_COUNT)
@@ -144,40 +146,24 @@ void draw_directory(){
 
       if(select_file_current_entry == current_entry_count){
 
-        gl_draw_button_plane(file_info_position_x,position_y,400,25);
+        gl_draw_button_plane(file_info_position_x-25,position_y,400,25);
+      }
+
+      if(valid_files_list[current_file_name]->d_type == DT_DIR){
+        draw_image(directory_icon_id, file_info_position_x-15,position_y,20,20,
+            1,1,1);
       }
 
       button_new(&select_files_entries[current_entry_count], (Vec2){file_info_position_x, position_y}, (Vec2){400,25});
 
-      // printf("current file number: %i\n",current_file_name);
-      // printf("valid files: %i\n",valid_files_count);
       draw_text(valid_files_list[current_file_name]->d_name, file_info_position_x, position_y, 25);
 
       current_entry_count++;
 
     }
-    return;
 
-    //remove this part for now
 
-    int entries_count = 0;
-    while((entry = readdir(directory)) != NULL){
-      // Skip . and .. directories
-      if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-        continue;
-      }
 
-      if(entry->d_name[0] == '.')
-        continue;
-
-      if (entries_count >= ENTRIES_COUNT)
-        break;
-
-      
-      entries_count++;
-    }
-
-    closedir(directory);
 }
 
 

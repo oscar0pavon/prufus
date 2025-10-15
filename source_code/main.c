@@ -64,7 +64,7 @@ int main() {
     };
 
 
-    load_texture();   
+    load_textures();   
 
     init_user_interface_data();
 

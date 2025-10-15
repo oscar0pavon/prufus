@@ -5,6 +5,7 @@
 #include <GL/glx.h>
 
 extern GLuint font_texture_id;
+extern GLuint directory_icon_id;
 
 void gl_draw_char(char character, float x, float y, float width, float height);
 
@@ -20,4 +21,6 @@ void set_ortho_projection(float width, float height);
 
 void gl_draw_button_plane(float x, float y, float width, float height);
 
+void draw_image(GLuint texture_id, float x, float y, float width, float height, 
+        float r, float g, float b);
 #endif

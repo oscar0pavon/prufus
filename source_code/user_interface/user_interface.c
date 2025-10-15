@@ -1,6 +1,7 @@
 #include "user_interface.h"
 #include "opengl.h"
 
+#include <GL/gl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -36,23 +37,29 @@ void draw_text(const char* text, float x, float y, int size) {
 }
 
 
+void load_textures(){
 
-void load_texture(){
+  load_texture(&font_texture_id,"images/font1.png");
+  load_texture(&directory_icon_id,"images/directory.png");
+
+}
+
+void load_texture(GLuint* texture_pointer, const char* path){
 
     unsigned int width, height, channels;
     unsigned char* image_data = NULL; 
 
 
-    unsigned int error = lodepng_decode32_file(&image_data,&width,&height,"images/font1.png");
+    unsigned int error = lodepng_decode32_file(&image_data,&width,&height,path);
 
     
 
     
     if(image_data && !error){
 
-      glGenTextures(1, &font_texture_id);
+      glGenTextures(1, texture_pointer);
 
-      glBindTexture(GL_TEXTURE_2D, font_texture_id);
+      glBindTexture(GL_TEXTURE_2D, *texture_pointer);
 
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

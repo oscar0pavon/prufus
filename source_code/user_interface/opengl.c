@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 GLuint font_texture_id;
+GLuint directory_icon_id;
 
 void set_ortho_projection(float width, float height){
 
@@ -58,7 +59,7 @@ void draw_border(float x, float y, float width, float height, float radius, int 
 }
 
 void gl_draw_button_plane(float x, float y, float width, float height) {
-    glColor3f(0,0,1);
+    glColor3f(rgb(53),rgb(132),rgb(228));
     glBegin(GL_QUADS);
         glVertex2f(x, y);
         glVertex2f(x + width, y);
@@ -91,14 +92,19 @@ void gl_draw_button(float x, float y, float width, float height, float radius, i
 
 }
 
-void draw_image(float x, float y, float width, float height, 
+void draw_image(GLuint texture_id, float x, float y, float width, float height, 
         float r, float g, float b) {
 
-    glBindTexture(GL_TEXTURE_2D, font_texture_id);
     
     glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    
+    glEnable(GL_BLEND);
 
-    //glColor3f(r, g, b); // Set button color
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+    glColor3f(r, g, b); // Set button color
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 0.0f);
         glVertex2f(x, y);
@@ -110,17 +116,9 @@ void draw_image(float x, float y, float width, float height,
         glVertex2f(x, y + height);
     glEnd();
 
-    // // Draw border (optional)
-    // glColor3f(0.0f, 0.0f, 0.0f); // Black border
-    // glLineWidth(2.0f); // Border thickness
-    // glBegin(GL_LINE_LOOP);
-    //     glVertex2f(x, y);
-    //     glVertex2f(x + width, y);
-    //     glVertex2f(x + width, y + height);
-    //     glVertex2f(x, y + height);
-    // glEnd();
 
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
 
 }
 void gl_draw_char(char character, float x, float y, float width, float height) {
