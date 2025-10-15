@@ -14,6 +14,8 @@
 #include <dirent.h>
 #include <sys/types.h>
 
+#include <stdlib.h>
+
 #define SELECT_WINDOW_WIDTH 855
 #define SELECT_WINDOW_HEIGHT 780
 
@@ -27,12 +29,83 @@ Button open_select_window;
 Button cancel_select_window;
 
 
+int file_info_position_x = 50;
+
+
+#define ENTRIES_COUNT 10
+
+int select_file_current_entry = 0;
+
+Button select_files_entries[ENTRIES_COUNT];
+
+
+struct dirent** files_list;
+int number_of_entries = 0;
+
+bool can_read_directory = true;
+
+
+
+void list_directory(const char* path){
+  number_of_entries = scandir(path,&files_list,0,alphasort);
+
+  if( number_of_entries < 0 ){
+    printf("Error: can't read directory %s\n",path);
+  }else{
+   printf("Directory count: %i\n",number_of_entries); 
+  }
+
+}
+
 void draw_directory(){
     DIR *directory;
     struct dirent *entry;
 
-    directory = opendir("/root/");
 
+    const char* directory_to_read = "/root/";
+    //directory = opendir(directory_to_read);
+
+    if(can_read_directory){
+      list_directory(directory_to_read);
+      can_read_directory = false; //we only read the directory one time
+    }
+
+    for(int i = 0; i < ENTRIES_COUNT;i++){
+      if(check_button_clicked(&select_files_entries[i])){
+        select_file_current_entry = i;
+      }
+    }
+
+    
+    int current_entry_count = 0;
+    for(int i = 0; i < number_of_entries; i++){
+
+
+
+      if(files_list[i]->d_name[0] == '.')
+        continue;
+
+      if (current_entry_count >= ENTRIES_COUNT)
+        break;
+
+      int position_y = 50+(current_entry_count*25);
+
+      if(select_file_current_entry == current_entry_count){
+
+        gl_draw_button_plane(file_info_position_x,position_y,400,25);
+      }
+
+      button_new(&select_files_entries[current_entry_count], (Vec2){file_info_position_x, position_y}, (Vec2){400,25});
+
+
+      draw_text(files_list[i]->d_name, file_info_position_x, position_y, 25);
+
+      current_entry_count++;
+
+    }
+    return;
+
+    //remove this part for now
 
     int entries_count = 0;
     while((entry = readdir(directory)) != NULL){
@@ -44,23 +117,39 @@ void draw_directory(){
       if(entry->d_name[0] == '.')
         continue;
 
-      if (entries_count >= 12)
+      if (entries_count >= ENTRIES_COUNT)
         break;
 
+      
       entries_count++;
-
-      draw_text(entry->d_name, 50, 50+(entries_count*25), 25);
     }
 
     closedir(directory);
 }
 
 
+void free_select_window(){
+
+  for(int i = 0; i< number_of_entries; i++){
+
+    free(files_list[i]);
+
+  }
+
+  free(files_list);
+
+  can_read_directory = true;
+
+  printf("Cleaned directory list\n");
+}
+
 void close_select_window(){
 
   hande_close_window(select_file_window);
-}
+  
+  free_select_window();
 
+}
 
 void init_select_window(){
     
@@ -68,6 +157,13 @@ void init_select_window(){
     cancel_select_window.execute = &close_select_window;
 
     button_new(&cancel_select_window, vec2(SELECT_WINDOW_WIDTH-100,SELECT_WINDOW_HEIGHT-90), vec2(80,30) );
+
+    select_file_current_entry = 0;
+
+    //init buttons
+    for(int i = 0; i < ENTRIES_COUNT;i++){
+      select_files_entries[i].selected = false;
+    }
 }
 
 

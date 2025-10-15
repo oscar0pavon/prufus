@@ -18,4 +18,6 @@ void gl_draw_button_select_window(float x, float y, float width, float height, f
 
 void set_ortho_projection(float width, float height);
 
+void gl_draw_button_plane(float x, float y, float width, float height);
+
 #endif

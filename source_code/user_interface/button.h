@@ -9,6 +9,7 @@ typedef struct Button{
     Vec2 dimention;
     char text[50];
     void (*execute)();
+    bool selected;
 
 }Button;
 

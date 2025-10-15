@@ -18,5 +18,6 @@ void create_select_file_window();
 
 void draw_select_window();
 
+void free_select_window();
 
 #endif

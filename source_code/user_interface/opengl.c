@@ -3,6 +3,7 @@
 #include "math.h"
 #include "window.h"
 #include <GL/gl.h>
+#include <stdio.h>
 
 GLuint font_texture_id;
 
@@ -53,6 +54,26 @@ void draw_border(float x, float y, float width, float height, float radius, int 
     }
     glEnd();
 
+
+}
+
+void gl_draw_button_plane(float x, float y, float width, float height) {
+    glColor3f(0,0,1);
+    glBegin(GL_QUADS);
+        glVertex2f(x, y);
+        glVertex2f(x + width, y);
+        glVertex2f(x + width, y + height);
+        glVertex2f(x, y + height);
+    glEnd();
+//lines
+    glColor3f(0,0,0);
+    glLineWidth(1);
+    glBegin(GL_LINE_LOOP);
+        glVertex2f(x, y);
+        glVertex2f(x + width, y);
+        glVertex2f(x + width, y + height);
+        glVertex2f(x, y + height);
+    glEnd();
 
 }
 

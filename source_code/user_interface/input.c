@@ -23,6 +23,9 @@ void* handle_input(void* none){
                   XInternAtom(display, "WM_DELETE_WINDOW", False)) {
 
             can_draw_select_window = false;
+            
+            free_select_window();
+
             XDestroyWindow(display, select_file_window);
           }
         }
