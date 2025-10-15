@@ -146,9 +146,7 @@ void free_select_window(){
 void close_select_window(){
 
   hande_close_window(select_file_window);
-  
-  free_select_window();
-
+ 
 }
 
 void init_select_window(){
