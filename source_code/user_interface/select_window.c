@@ -102,8 +102,9 @@ void draw_directory(){
     DIR *directory;
     struct dirent *entry;
 
-
-    const char* directory_to_read = "/root/";
+  
+    const char* home = getenv("HOME");
+    const char* directory_to_read = home;
     //directory = opendir(directory_to_read);
 
     if(can_read_directory){
