@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 void* handle_input(void* none){
-
+  return NULL;
   while (prufus_window_running) {
     if (XPending(display)) {
 

@@ -1,6 +1,9 @@
 CFLAGS := -I/usr/include -fdiagnostics-color=always -g
 
-CLINKS := -lX11 -lGL -lpthread -lm
+WAYLAND_LIBS := -lEGL -lwayland-client -lwayland-egl
+WAYLAND_LIBS += -lxkbcommon -lpway
+
+CLINKS := -lX11 -lGL -lpthread -lm $(WAYLAND_LIBS)
 
 .PHONY: prufus
 

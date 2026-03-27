@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include <pway/pway.h>
+
 bool prufus_window_running = true;
 
 bool check_buttons_collision = false;
@@ -64,6 +66,10 @@ void close_prufus_window(){
 }
 
 int prufus_create_window(){
+  
+  pway = pway_init();
+
+    return 0;
 
     display = XOpenDisplay(NULL); // NULL for default display
     if (display == NULL) {

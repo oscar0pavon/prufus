@@ -1,4 +1,5 @@
 
+#include <pway/pway.h>
 #include <string.h>
 #include <unistd.h>
 #include <stddef.h>
@@ -68,13 +69,12 @@ int main() {
 
     init_user_interface_data();
 
-    create_select_file_window();
+    //create_select_file_window();
 
     //This is the main rendering loop
     //All the things happends here
     while (prufus_window_running) {
-        
-
+      pway_handle_events();
 
         glXMakeCurrent(display, prufus_window, prufus_main_window_context);
   
