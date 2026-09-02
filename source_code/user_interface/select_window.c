@@ -25,7 +25,7 @@ char selected_iso_path[MAX_ISO_PATH_LEN] = "";
 
 Button cancel_select_window;
 
-int file_info_position_x = 150;
+int file_info_position_x = 40;
 
 #define ENTRIES_COUNT 25
 #define MAX_FILE_ENTRIES 1024
@@ -176,7 +176,8 @@ void draw_directory(){
 
     FileEntry* entry = &file_entries[current_file_index];
 
-    button_new(&select_files_entries[current_entry_count], (Vec2){file_info_position_x, position_y}, (Vec2){400, 25});
+    button_new(&select_files_entries[current_entry_count], (Vec2){file_info_position_x, position_y},
+        (Vec2){WINDOW_WIDTH - file_info_position_x - 20, 25});
 
     if(check_button_clicked(&select_files_entries[current_entry_count])){
       activate_entry(current_file_index);

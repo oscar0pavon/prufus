@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 
-#define WINDOW_WIDTH 855
-#define WINDOW_HEIGHT 780
+#define WINDOW_WIDTH 480
+#define WINDOW_HEIGHT 680
 
 extern bool prufus_window_running;
 extern bool check_buttons_collision;

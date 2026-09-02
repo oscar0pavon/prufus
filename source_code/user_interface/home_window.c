@@ -30,6 +30,17 @@
 #define STATUS_BAR_Y (BUTTONS_Y - 15 - 40)
 #define STATUS_HEADER_Y (STATUS_BAR_Y - 40)
 
+#define SELECT_BUTTON_WIDTH 90
+#define CHECK_WIDTH 24
+#define ROW_GAP 8
+#define BOOT_BOX_WIDTH (CONTENT_WIDTH - SELECT_BUTTON_WIDTH - CHECK_WIDTH - ROW_GAP*2)
+#define BOOT_CHECK_X (RIGHT_EDGE - SELECT_BUTTON_WIDTH - ROW_GAP - CHECK_WIDTH)
+
+#define CANCEL_BUTTON_WIDTH 90
+#define START_BUTTON_WIDTH 130
+#define CANCEL_BUTTON_X (RIGHT_EDGE - CANCEL_BUTTON_WIDTH)
+#define START_BUTTON_X (CANCEL_BUTTON_X - 10 - START_BUTTON_WIDTH)
+
 static Button device_dropdown_button;
 static Button select_iso_button;
 static Button start_usb_button;
@@ -51,13 +62,13 @@ void init_home_window(){
 
   strcpy(select_iso_button.text, "SELECT");
   select_iso_button.execute = &create_select_file_window;
-  button_new(&select_iso_button, vec2(670, BOOT_ROW_Y), vec2(165, 34));
+  button_new(&select_iso_button, vec2(RIGHT_EDGE - SELECT_BUTTON_WIDTH, BOOT_ROW_Y), vec2(SELECT_BUTTON_WIDTH, 34));
 
   strcpy(start_usb_button.text, "START");
-  button_new(&start_usb_button, vec2(560, BUTTONS_Y), vec2(160, 34));
+  button_new(&start_usb_button, vec2(START_BUTTON_X, BUTTONS_Y), vec2(START_BUTTON_WIDTH, 34));
 
   strcpy(cancel_button.text, "CANCEL");
-  button_new(&cancel_button, vec2(735, BUTTONS_Y), vec2(100, 34));
+  button_new(&cancel_button, vec2(CANCEL_BUTTON_X, BUTTONS_Y), vec2(CANCEL_BUTTON_WIDTH, 34));
 
   strcpy(confirm_yes_button.text, "I'm sure");
   strcpy(confirm_no_button.text, "Cancel");
@@ -113,13 +124,13 @@ static const char* iso_file_name(){
 
 static void draw_boot_selection(){
 
-  draw_button_outline(20, BOOT_ROW_Y, 600, 34);
+  draw_button_outline(MARGIN, BOOT_ROW_Y, BOOT_BOX_WIDTH, 34);
 
   if(has_selected_iso){
-    draw_text(iso_file_name(), 30, BOOT_ROW_Y + 8);
-    draw_text_accent("OK", 630, BOOT_ROW_Y + 8);
+    draw_text(iso_file_name(), MARGIN + 10, BOOT_ROW_Y + 8);
+    draw_text_accent("OK", BOOT_CHECK_X, BOOT_ROW_Y + 8);
   }else{
-    draw_text_muted("No boot image selected", 30, BOOT_ROW_Y + 8);
+    draw_text_muted("No boot image selected", MARGIN + 10, BOOT_ROW_Y + 8);
   }
 
   if(check_button_clicked(&select_iso_button)){
@@ -168,17 +179,19 @@ static void draw_bottom_bar(){
 
 static void draw_confirm_dialog(){
 
-  int box_x = (WINDOW_WIDTH - 500) / 2;
+  int box_x = MARGIN;
   int box_y = 300;
+  int box_width = CONTENT_WIDTH;
+  int button_width = (box_width - 30 - 20) / 2;
 
-  draw_button_outline(box_x, box_y, 500, 200);
+  draw_button_outline(box_x, box_y, box_width, 200);
 
   draw_text("WARNING! All data will be lost", box_x + 20, box_y + 15);
   draw_text(selected_iso_path, box_x + 20, box_y + 45);
   draw_text(usb_devices[selected_device_index].label, box_x + 20, box_y + 70);
 
-  button_new(&confirm_yes_button, vec2(box_x + 30, box_y + 140), vec2(200, 34));
-  button_new(&confirm_no_button, vec2(box_x + 270, box_y + 140), vec2(200, 34));
+  button_new(&confirm_yes_button, vec2(box_x + 20, box_y + 140), vec2(button_width, 34));
+  button_new(&confirm_no_button, vec2(box_x + 20 + button_width + 10, box_y + 140), vec2(button_width, 34));
 
   if(check_button_clicked(&confirm_yes_button)){
     usb_creation_start(selected_iso_path, usb_devices[selected_device_index].path);
@@ -194,15 +207,18 @@ static void draw_confirm_dialog(){
 
 static void draw_success_dialog(){
 
-  int box_x = (WINDOW_WIDTH - 400) / 2;
+  int box_x = MARGIN;
   int box_y = 300;
+  int box_width = CONTENT_WIDTH;
 
-  draw_button_outline(box_x, box_y, 400, 100);
+  draw_button_outline(box_x, box_y, box_width, 110);
 
-  const char* message = "Success, now you can disconnect your USB!";
-  draw_text(message, box_x + (400 - measure_text_width(message)) / 2, box_y + 20);
+  const char* message = "Success, now you can";
+  const char* message2 = "disconnect your USB!";
+  draw_text(message, box_x + (box_width - measure_text_width(message)) / 2, box_y + 15);
+  draw_text(message2, box_x + (box_width - measure_text_width(message2)) / 2, box_y + 38);
 
-  button_new(&success_close_button, vec2(box_x + 125, box_y + 55), vec2(150, 30));
+  button_new(&success_close_button, vec2(box_x + (box_width - 150) / 2, box_y + 65), vec2(150, 30));
 
   if(check_button_clicked(&success_close_button)){
     usb_creation_success = false;
