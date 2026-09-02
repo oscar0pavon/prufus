@@ -67,13 +67,42 @@ float measure_text_width(const char* text){
     return width;
 }
 
-/* Fake-bold: the CPU backend has no bold face, so a section title is drawn
- * twice with a 1px horizontal offset, then underlined like Rufus's section
- * headers ("Drive Properties", "Status"). */
+/* The CPU backend has one fixed glyph size, so a section title can't actually
+ * be rendered in a bigger point size. Instead each glyph is stamped at four
+ * 1px-offset positions (thickens it) with extra letter-spacing between
+ * glyphs, which reads as a bigger/bolder title than the regular body text.
+ * The rule then runs beside the title - filling the rest of the row - like
+ * Rufus's section headers ("Drive Properties ───", "Status ───") instead of
+ * underlining it. */
+static const float header_stamp_offsets[4][2] = {{0,0},{1,0},{0,1},{1,1}};
+#define HEADER_LETTER_SPACING 3
+
+static float draw_header_text(const char* text, float x, float y){
+    float pen_x = x;
+    float baseline_y = y + pfonts_get_ascent();
+
+    for(int i = 0; text[i] != '\0'; ++i){
+        uint32_t codepoint = (unsigned char)text[i];
+        for(int stamp = 0; stamp < 4; ++stamp){
+            pfonts_cpu_draw_glyph(codepoint, text_color,
+                pen_x + header_stamp_offsets[stamp][0],
+                baseline_y + header_stamp_offsets[stamp][1]);
+        }
+        pen_x += pfonts_get_glyph_advance(codepoint) + HEADER_LETTER_SPACING;
+    }
+
+    return pen_x;
+}
+
 void draw_section_header(const char* text, float x, float y, float width){
-    draw_text_with_color(text, x, y, text_color);
-    draw_text_with_color(text, x + 1, y, text_color);
-    pfonts_cpu_draw_rect(text_color, x, y + 24, width, 2);
+    float text_end_x = draw_header_text(text, x, y);
+
+    float line_x = text_end_x + 10;
+    float line_end_x = x + width;
+    if(line_x < line_end_x){
+        float line_y = y + pfonts_get_cell_height() / 2;
+        pfonts_cpu_draw_rect(text_color, line_x, line_y, line_end_x - line_x, 2);
+    }
 }
 
 void draw_status_bar(StatusBarState state, float x, float y, float width, float height, const char* text){
