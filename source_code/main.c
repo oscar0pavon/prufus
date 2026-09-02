@@ -9,6 +9,7 @@
 
 #include "user_interface/window.h"
 #include "user_interface/cpu_image.h"
+#include "user_interface/draw.h"
 
 #include "user_interface/select_window.h"
 #include "user_interface/home_window.h"
@@ -47,6 +48,7 @@ int main() {
 
         pfonts_cpu_set_target(pixels, WINDOW_WIDTH, WINDOW_HEIGHT, stride / 4);
         cpu_image_set_target(pixels, WINDOW_WIDTH, WINDOW_HEIGHT, stride / 4);
+        draw_set_target(pixels, WINDOW_WIDTH, WINDOW_HEIGHT, stride / 4);
 
         pfonts_cpu_draw_rect((PColor){background_color.r, background_color.g,
                                        background_color.b},

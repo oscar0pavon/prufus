@@ -1,6 +1,8 @@
 #ifndef PRUFUS_DRAW_H
 #define PRUFUS_DRAW_H
 
+#include <stdint.h>
+
 void draw_button_outline(float x, float y, float width, float height);
 
 void draw_button_plane(float x, float y, float width, float height);
@@ -23,5 +25,10 @@ typedef enum StatusBarState{
 } StatusBarState;
 
 void draw_status_bar(StatusBarState state, float x, float y, float width, float height, const char* text);
+
+/* Must be called once per frame, alongside pfonts_cpu_set_target() /
+ * cpu_image_set_target(), so draw_section_header() can composite scaled-up
+ * text onto the real target buffer. */
+void draw_set_target(uint32_t* pixels, int width, int height, int stride);
 
 #endif
