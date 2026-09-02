@@ -15,6 +15,16 @@
 #define RIGHT_EDGE (WINDOW_WIDTH - MARGIN)
 #define CONTENT_WIDTH (WINDOW_WIDTH - MARGIN*2)
 
+#define APP_TITLE_Y 15
+#define APP_TITLE_SCALE 2.2f
+
+#define DRIVE_HEADER_Y 90
+#define DEVICE_LABEL_Y 126
+#define DEVICE_DROPDOWN_Y 146
+#define DEVICE_LIST_Y 184
+#define BOOT_LABEL_Y 240
+#define BOOT_ROW_Y 260
+
 #define BOTTOM_INFO_Y (WINDOW_HEIGHT - 40)
 #define BUTTONS_Y (BOTTOM_INFO_Y - 20 - 34)
 #define STATUS_BAR_Y (BUTTONS_Y - 15 - 40)
@@ -37,11 +47,11 @@ static Button success_close_button;
 
 void init_home_window(){
 
-  button_new(&device_dropdown_button, vec2(MARGIN, 76), vec2(CONTENT_WIDTH, 34));
+  button_new(&device_dropdown_button, vec2(MARGIN, DEVICE_DROPDOWN_Y), vec2(CONTENT_WIDTH, 34));
 
   strcpy(select_iso_button.text, "SELECT");
   select_iso_button.execute = &create_select_file_window;
-  button_new(&select_iso_button, vec2(670, 190), vec2(165, 34));
+  button_new(&select_iso_button, vec2(670, BOOT_ROW_Y), vec2(165, 34));
 
   strcpy(start_usb_button.text, "START");
   button_new(&start_usb_button, vec2(560, BUTTONS_Y), vec2(160, 34));
@@ -84,7 +94,7 @@ static void draw_device_dropdown(){
     strncpy(device_list_entries[i].text, usb_devices[i].label, sizeof(device_list_entries[i].text) - 1);
     device_list_entries[i].text[sizeof(device_list_entries[i].text) - 1] = 0;
 
-    Vec2 position = vec2(MARGIN, 114 + i * 28);
+    Vec2 position = vec2(MARGIN, DEVICE_LIST_Y + i * 28);
     button_new(&device_list_entries[i], position, vec2(CONTENT_WIDTH, 28));
 
     if(check_button_clicked(&device_list_entries[i])){
@@ -103,13 +113,13 @@ static const char* iso_file_name(){
 
 static void draw_boot_selection(){
 
-  draw_button_outline(20, 190, 600, 34);
+  draw_button_outline(20, BOOT_ROW_Y, 600, 34);
 
   if(has_selected_iso){
-    draw_text(iso_file_name(), 30, 198);
-    draw_text_accent("OK", 630, 198);
+    draw_text(iso_file_name(), 30, BOOT_ROW_Y + 8);
+    draw_text_accent("OK", 630, BOOT_ROW_Y + 8);
   }else{
-    draw_text_muted("No boot image selected", 30, 198);
+    draw_text_muted("No boot image selected", 30, BOOT_ROW_Y + 8);
   }
 
   if(check_button_clicked(&select_iso_button)){
@@ -205,11 +215,15 @@ void draw_home_window(){
 
   usb_creation_poll();
 
-  draw_section_header("Drive Properties", MARGIN, 20, CONTENT_WIDTH);
-  draw_text_muted("Device", MARGIN, 56);
+  const char* app_title = "prufus 0.2";
+  float title_width = measure_text_scaled_width(app_title, APP_TITLE_SCALE);
+  draw_text_scaled(app_title, (WINDOW_WIDTH - title_width) / 2, APP_TITLE_Y, APP_TITLE_SCALE);
+
+  draw_section_header("Drive Properties", MARGIN, DRIVE_HEADER_Y, CONTENT_WIDTH);
+  draw_text_muted("Device", MARGIN, DEVICE_LABEL_Y);
   draw_device_dropdown();
 
-  draw_text_muted("Boot selection", MARGIN, 170);
+  draw_text_muted("Boot selection", MARGIN, BOOT_LABEL_Y);
   draw_boot_selection();
 
   draw_section_header("Status", MARGIN, STATUS_HEADER_Y, CONTENT_WIDTH);

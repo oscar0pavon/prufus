@@ -103,7 +103,12 @@ static uint32_t pack_opaque_color(PColor color){
  * page_background_color so the glyphs anti-alias correctly, then has pixman
  * upscale that buffer onto the real target - producing an actually bigger
  * title instead of a fake-bold trick. Returns the scaled-up width drawn. */
-static float draw_text_scaled(const char* text, float x, float y, float scale){
+float measure_text_scaled_width(const char* text, float scale){
+    int source_width = (int)ceilf(measure_text_width(text)) + 2;
+    return source_width * scale;
+}
+
+float draw_text_scaled(const char* text, float x, float y, float scale){
     int source_width = (int)ceilf(measure_text_width(text)) + 2;
     int source_height = (int)ceilf(pfonts_get_cell_height()) + 2;
 
