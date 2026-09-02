@@ -184,7 +184,7 @@ void draw_directory(){
     }
 
     if(entry->is_dir){
-      cpu_image_draw(&directory_icon, file_info_position_x - 15, position_y);
+      cpu_image_draw(&directory_icon, file_info_position_x - 20, position_y + 4);
     }
 
     draw_text(entry->name, file_info_position_x, position_y);

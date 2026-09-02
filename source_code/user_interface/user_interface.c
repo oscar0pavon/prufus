@@ -12,6 +12,6 @@ void init_user_interface_data(){
   background_color.g = rgb(245.f);
   background_color.b = rgb(244.f);
 
-  cpu_image_load(&directory_icon, "images/directory.png");
+  cpu_image_load_scaled(&directory_icon, "images/directory.png", 18, 18);
 
 }

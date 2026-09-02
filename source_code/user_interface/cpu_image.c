@@ -50,6 +50,44 @@ bool cpu_image_load(CpuImage* out, const char* path){
     return true;
 }
 
+bool cpu_image_load_scaled(CpuImage* out, const char* path, int target_width, int target_height){
+    CpuImage source;
+    if(!cpu_image_load(&source, path))
+        return false;
+
+    uint32_t* scaled_pixels = calloc((size_t)target_width * target_height, sizeof(uint32_t));
+    if(!scaled_pixels){
+        free(source.pixels);
+        return false;
+    }
+
+    pixman_image_t* source_image = pixman_image_create_bits(PIXMAN_a8r8g8b8,
+        source.width, source.height, source.pixels, source.width * 4);
+    pixman_image_set_filter(source_image, PIXMAN_FILTER_BILINEAR, NULL, 0);
+
+    pixman_transform_t transform;
+    pixman_transform_init_scale(&transform,
+        pixman_double_to_fixed((double)source.width / target_width),
+        pixman_double_to_fixed((double)source.height / target_height));
+    pixman_image_set_transform(source_image, &transform);
+
+    pixman_image_t* dest_image = pixman_image_create_bits(PIXMAN_a8r8g8b8,
+        target_width, target_height, scaled_pixels, target_width * 4);
+
+    pixman_image_composite32(PIXMAN_OP_SRC, source_image, NULL, dest_image,
+        0, 0, 0, 0, 0, 0, target_width, target_height);
+
+    pixman_image_unref(source_image);
+    pixman_image_unref(dest_image);
+    free(source.pixels);
+
+    out->pixels = scaled_pixels;
+    out->width = target_width;
+    out->height = target_height;
+
+    return true;
+}
+
 void cpu_image_set_target(uint32_t* pixels, int width, int height, int stride){
     target_pixels = pixels;
     target_width = width;
