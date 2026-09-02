@@ -1,6 +1,7 @@
 #ifndef USER_INTERFACE_H
 #define USER_INTERFACE_H
-#include <GL/gl.h>
+
+#include "cpu_image.h"
 
 typedef struct Color{
    float r;
@@ -11,11 +12,8 @@ typedef struct Color{
 
 extern Color background_color;
 
-void draw_text(const char* text, float x, float y, int size);
+extern CpuImage directory_icon;
 
 void init_user_interface_data();
-
-void load_texture(GLuint* texture_pointer, const char* path);
-void load_textures();
 
 #endif

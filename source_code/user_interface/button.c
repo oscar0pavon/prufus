@@ -1,11 +1,8 @@
 #include "button.h"
-#include "opengl.h"
+#include "draw.h"
 #include <stdbool.h>
 
-#include "select_window.h"
 #include "window.h"
-
-#include "user_interface.h"
 
 bool check_button_clicked(Button *button) {
 
@@ -42,9 +39,8 @@ void button_new(Button* out, Vec2 position, Vec2 dimension){
 void draw_button(Button* button){
 
 
-    gl_draw_button(button->position.x, button->position.y,
-            button->dimention.x, button->dimention.y,
-            3, 2);
+    draw_button_outline(button->position.x, button->position.y,
+            button->dimention.x, button->dimention.y);
 
     Vec2 center_x;
     center_x.x = button->position.x+5;//offset TODO
@@ -52,7 +48,7 @@ void draw_button(Button* button){
     center_x.y = center_x.y - 10;//offset for center in Y
 
 
-    draw_text(button->text,center_x.x, center_x.y,24);
+    draw_text(button->text,center_x.x, center_x.y);
 
     
 }

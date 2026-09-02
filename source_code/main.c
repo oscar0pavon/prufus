@@ -1,21 +1,21 @@
-
 #include <pway/pway.h>
+#include <pfonts/pfonts.h>
+#include <pfonts/pfonts_cpu.h>
 #include <string.h>
 #include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <pthread.h>
 
 
 #include "user_interface/types.h"
 #include "user_interface/window.h"
-#include "user_interface/opengl.h"
+#include "user_interface/draw.h"
+#include "user_interface/cpu_image.h"
 
 #include "user_interface/select_window.h"
 
 #include "user_interface/button.h"
-#include "user_interface/input.h"
 #include "user_interface/user_interface.h"
 
 #include "device.h"
@@ -29,100 +29,89 @@ Button close_button;
 
 int main() {
     printf("Welcome to prufus\n");
-    XInitThreads();
-    prufus_create_window();
 
-    XSetErrorHandler(handle_x_error);
+    if(prufus_create_window() != 0){
+        return 1;
+    }
 
-    read_sys_block();    
-
-    init_opengl();
-    
-    pthread_t input_thread;
-
-    pthread_create(&input_thread,NULL,handle_input,NULL);
-
+    read_sys_block();
 
     strcpy(start_button.text,"Start");
     strcpy(close_button.text,"Close");
     close_button.execute = &close_prufus_window;
 
-    button_new(&close_button, vec2(500-100,620-50), vec2(80,30) );
-    button_new(&start_button, vec2(400-100,620-50), vec2(80,30) );
+    button_new(&close_button, vec2(WINDOW_WIDTH-100,WINDOW_HEIGHT-80), vec2(80,30) );
+    button_new(&start_button, vec2(WINDOW_WIDTH-200,WINDOW_HEIGHT-80), vec2(80,30) );
 
     Button select_button;
-    
+
     strcpy(select_button.text,"Select");
 
     select_button.execute = &create_select_file_window;
 
-    button_new(&select_button, vec2(500-100,200-40), vec2(80,30) );
+    button_new(&select_button, vec2(WINDOW_WIDTH-100,160), vec2(80,30) );
 
     Button buttons[] = {
-        start_button, 
+        start_button,
         close_button,
         select_button
     };
 
-
-    load_textures();   
-
     init_user_interface_data();
-
-    //create_select_file_window();
 
     //This is the main rendering loop
     //All the things happends here
     while (prufus_window_running) {
       pway_handle_events();
 
-        glXMakeCurrent(display, prufus_window, prufus_main_window_context);
-  
-        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        
-        glClearColor(background_color.r, background_color.g,background_color.b, 1);
+      if(!prufus_window_running)
+        break;
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      int stride;
+      uint32_t* pixels = pway_shm_get_buffer(&stride);
 
-        set_ortho_projection(WINDOW_WIDTH,WINDOW_HEIGHT);
+      if(pixels){
 
-        int buttons_count = sizeof(buttons)/sizeof(Button);
+        pfonts_cpu_set_target(pixels, WINDOW_WIDTH, WINDOW_HEIGHT, stride / 4);
+        cpu_image_set_target(pixels, WINDOW_WIDTH, WINDOW_HEIGHT, stride / 4);
 
-        for(int i = 0; i < buttons_count; i++){
-            if(check_button_clicked(&buttons[i])){
-                if(buttons[i].execute != NULL){
-                    buttons[i].execute();
-                }
-            }
-            draw_button(&buttons[i]);
-        }
-        
-        //draw_image(50,50,20,20,1,1,1);
+        pfonts_cpu_draw_rect((PColor){background_color.r, background_color.g,
+                                       background_color.b},
+                              0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-
-
-        draw_text("prufus",195,15,24);
-        draw_text("Device",0,80,24);
-        draw_text("Boot selection",0,140,24);
-        
-        //glFlush();
-        
-        glXSwapBuffers(display, prufus_window);
-        
         if(can_draw_select_window){
-            draw_select_window();
+
+          draw_select_window();
+
+        }else{
+
+          int buttons_count = sizeof(buttons)/sizeof(Button);
+
+          for(int i = 0; i < buttons_count; i++){
+              if(check_button_clicked(&buttons[i])){
+                  if(buttons[i].execute != NULL){
+                      buttons[i].execute();
+                  }
+              }
+              draw_button(&buttons[i]);
+          }
+
+          draw_text("prufus",370,15);
+          draw_text("Device",0,80);
+          draw_text("Boot selection",0,140);
+
         }
 
+        pway_shm_commit(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+      }
 
-        mouse_wheel_up = 0;
-        mouse_wheel_down = 0;
+      mouse_wheel_up = 0;
+      mouse_wheel_down = 0;
 
-        usleep(50000.f);
+      usleep(50000.f);
     }
 
-    XDestroyWindow(display, prufus_window);
-
-    XCloseDisplay(display);
+    pway_finish();
 
     return 0;
 }
