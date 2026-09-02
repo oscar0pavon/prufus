@@ -15,6 +15,11 @@
 #define RIGHT_EDGE (WINDOW_WIDTH - MARGIN)
 #define CONTENT_WIDTH (WINDOW_WIDTH - MARGIN*2)
 
+#define BOTTOM_INFO_Y (WINDOW_HEIGHT - 40)
+#define BUTTONS_Y (BOTTOM_INFO_Y - 20 - 34)
+#define STATUS_BAR_Y (BUTTONS_Y - 15 - 40)
+#define STATUS_HEADER_Y (STATUS_BAR_Y - 40)
+
 static Button device_dropdown_button;
 static Button select_iso_button;
 static Button start_usb_button;
@@ -39,10 +44,10 @@ void init_home_window(){
   button_new(&select_iso_button, vec2(670, 190), vec2(165, 34));
 
   strcpy(start_usb_button.text, "START");
-  button_new(&start_usb_button, vec2(560, 350), vec2(160, 34));
+  button_new(&start_usb_button, vec2(560, BUTTONS_Y), vec2(160, 34));
 
   strcpy(cancel_button.text, "CANCEL");
-  button_new(&cancel_button, vec2(735, 350), vec2(100, 34));
+  button_new(&cancel_button, vec2(735, BUTTONS_Y), vec2(100, 34));
 
   strcpy(confirm_yes_button.text, "I'm sure");
   strcpy(confirm_no_button.text, "Cancel");
@@ -140,14 +145,14 @@ static void draw_bottom_bar(){
     snprintf(device_count_text, sizeof(device_count_text), "%d device%s found",
         usb_device_count, usb_device_count == 1 ? "" : "s");
   }
-  draw_text_muted(device_count_text, MARGIN, WINDOW_HEIGHT - 40);
+  draw_text_muted(device_count_text, MARGIN, BOTTOM_INFO_Y);
 
   if(usb_creation_running){
     time_t elapsed = time(NULL) - usb_creation_start_time;
     char elapsed_text[16];
     snprintf(elapsed_text, sizeof(elapsed_text), "%02d:%02d",
         (int)(elapsed / 60), (int)(elapsed % 60));
-    draw_text_muted(elapsed_text, RIGHT_EDGE - measure_text_width(elapsed_text), WINDOW_HEIGHT - 40);
+    draw_text_muted(elapsed_text, RIGHT_EDGE - measure_text_width(elapsed_text), BOTTOM_INFO_Y);
   }
 }
 
@@ -207,8 +212,8 @@ void draw_home_window(){
   draw_text_muted("Boot selection", MARGIN, 170);
   draw_boot_selection();
 
-  draw_section_header("Status", MARGIN, 250, CONTENT_WIDTH);
-  draw_status_bar(current_status_state(), MARGIN, 286, CONTENT_WIDTH, 40, current_status_text());
+  draw_section_header("Status", MARGIN, STATUS_HEADER_Y, CONTENT_WIDTH);
+  draw_status_bar(current_status_state(), MARGIN, STATUS_BAR_Y, CONTENT_WIDTH, 40, current_status_text());
 
   bool can_start = has_selected_iso && usb_device_count > 0 && !usb_creation_running;
   if(check_button_clicked(&start_usb_button) && can_start){
