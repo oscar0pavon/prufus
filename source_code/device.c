@@ -12,16 +12,16 @@
 // For get blocks devices we need to navigate in /sys/block
 // then we need to know if the block device is -removable-
 
+UsbDevice usb_devices[MAX_USB_DEVICES];
+int usb_device_count = 0;
 
 bool is_usb_device(const char* device_path){
   char link_path[PATH_MAX];
   char resolved_path[PATH_MAX];
 
   snprintf(link_path,PATH_MAX, "/sys/block/%s",device_path);
-  //printf("%s\n",link_path);//block path
 
   if(realpath(link_path,resolved_path)!= NULL){
-    //printf("%s\n",resolved_path);//this is the PCI/USB path
     if (strstr(resolved_path, "/usb") != NULL) {
       return 1;
     }
@@ -42,24 +42,19 @@ char* read_sys_file(const char* path){
   }
   fclose(file);
   return buffer;
-    
+
 }
 
-void get_model_name(const char* path){
-  char* file = read_sys_file(path);
-  printf("%s\n",file);
-  free(file);
-}
-
-void get_size(const char* path){
-  
-  char* file = read_sys_file(path);
-  if(file != NULL){
-    unsigned long long size_in_blocks = strtoull(file, NULL, 10);
-    unsigned long long size_in_bytes = size_in_blocks * 512;
-    printf("Size: %llu bytes\n", size_in_bytes);
-    free(file);
+void trim_trailing_space(char* text){
+  int length = strlen(text);
+  while(length > 0 && text[length-1] == ' '){
+    text[--length] = 0;
   }
+}
+
+void format_size_gib(char* out, size_t out_size, unsigned long long size_in_bytes){
+  double gib = size_in_bytes / (1024.0*1024.0*1024.0);
+  snprintf(out, out_size, "%.1f GiB", gib);
 }
 
 void read_sys_block(){
@@ -69,19 +64,24 @@ void read_sys_block(){
   char path[PATH_MAX];
   char removable_content[2];//we only need a char '1' or '0'
 
+  usb_device_count = 0;
+
   directory = opendir("/sys/block");
 
   if(!directory){
       perror("open /sys/block");
       return;
   }
-    
+
   while( (entry = readdir(directory)) != NULL ){
     // Skip . and .. directories
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
       continue;
     }
-    
+
+    if(usb_device_count >= MAX_USB_DEVICES)
+      break;
+
     snprintf(path,PATH_MAX,"/sys/block/%s/removable",entry->d_name);
     removable_file = fopen(path,"r");
     if(!removable_file)
@@ -90,18 +90,41 @@ void read_sys_block(){
     if(fgets(removable_content, sizeof(removable_content), removable_file) != NULL) {
         if(removable_content[0] == '1'){//that means possibly is an USB stick or USB disk
           if(is_usb_device(entry->d_name)){
-            snprintf(path,PATH_MAX,"/sys/block/%s/device/model",entry->d_name);
 
-            printf("Found /dev/%s\n",entry->d_name);
-            get_model_name(path);
+            UsbDevice* device = &usb_devices[usb_device_count];
+
+            snprintf(device->path, sizeof(device->path), "/dev/%s", entry->d_name);
+
+            snprintf(path,PATH_MAX,"/sys/block/%s/device/model",entry->d_name);
+            char* model = read_sys_file(path);
 
             snprintf(path,PATH_MAX,"/sys/block/%s/size",entry->d_name);
+            char* size_text = read_sys_file(path);
 
-            get_size(path);
-            
+            char size_label[32] = "";
+            if(size_text != NULL){
+              unsigned long long size_in_blocks = strtoull(size_text, NULL, 10);
+              unsigned long long size_in_bytes = size_in_blocks * 512;
+              format_size_gib(size_label, sizeof(size_label), size_in_bytes);
+            }
+
+            if(model != NULL){
+              trim_trailing_space(model);
+            }
+
+            snprintf(device->label, sizeof(device->label), "%s %s",
+                model != NULL ? model : "USB drive", size_label);
+
+            free(model);
+            free(size_text);
+
+            usb_device_count++;
           }
         }
     }
-    
+    fclose(removable_file);
+
   }
+
+  closedir(directory);
 }

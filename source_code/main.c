@@ -1,28 +1,21 @@
 #include <pway/pway.h>
 #include <pfonts/pfonts.h>
 #include <pfonts/pfonts_cpu.h>
-#include <string.h>
 #include <unistd.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
 
 
-#include "user_interface/types.h"
 #include "user_interface/window.h"
-#include "user_interface/draw.h"
 #include "user_interface/cpu_image.h"
 
 #include "user_interface/select_window.h"
+#include "user_interface/home_window.h"
 
-#include "user_interface/button.h"
 #include "user_interface/user_interface.h"
 
 #include "device.h"
-
-
-Button start_button;
-Button close_button;
 
 
 
@@ -36,28 +29,8 @@ int main() {
 
     read_sys_block();
 
-    strcpy(start_button.text,"Start");
-    strcpy(close_button.text,"Close");
-    close_button.execute = &close_prufus_window;
-
-    button_new(&close_button, vec2(WINDOW_WIDTH-100,WINDOW_HEIGHT-80), vec2(80,30) );
-    button_new(&start_button, vec2(WINDOW_WIDTH-200,WINDOW_HEIGHT-80), vec2(80,30) );
-
-    Button select_button;
-
-    strcpy(select_button.text,"Select");
-
-    select_button.execute = &create_select_file_window;
-
-    button_new(&select_button, vec2(WINDOW_WIDTH-100,160), vec2(80,30) );
-
-    Button buttons[] = {
-        start_button,
-        close_button,
-        select_button
-    };
-
     init_user_interface_data();
+    init_home_window();
 
     //This is the main rendering loop
     //All the things happends here
@@ -85,20 +58,7 @@ int main() {
 
         }else{
 
-          int buttons_count = sizeof(buttons)/sizeof(Button);
-
-          for(int i = 0; i < buttons_count; i++){
-              if(check_button_clicked(&buttons[i])){
-                  if(buttons[i].execute != NULL){
-                      buttons[i].execute();
-                  }
-              }
-              draw_button(&buttons[i]);
-          }
-
-          draw_text("prufus",370,15);
-          draw_text("Device",0,80);
-          draw_text("Boot selection",0,140);
+          draw_home_window();
 
         }
 

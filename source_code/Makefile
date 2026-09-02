@@ -10,7 +10,7 @@ CLINKS += $(shell pkg-config --libs pixman-1)
 .PHONY: prufus
 
 OBJS := window.o draw.o user_interface.o button.o device.o lodepng.o
-OBJS += select_window.o input.o cpu_image.o
+OBJS += select_window.o input.o cpu_image.o home_window.o usb_creation.o
 
 prufus: main.c $(OBJS)
 	cc $(CFLAGS) main.c $(OBJS) -o ../prufus $(CLINKS) 
@@ -22,6 +22,12 @@ input.o: user_interface/input.c
 	cc $(CFLAGS) -c $<
 
 select_window.o: user_interface/select_window.c
+	cc $(CFLAGS) -c $<
+
+home_window.o: user_interface/home_window.c
+	cc $(CFLAGS) -c $<
+
+usb_creation.o: user_interface/usb_creation.c
 	cc $(CFLAGS) -c $<
 
 lodepng.o: user_interface/lodepng.c
