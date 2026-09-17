@@ -1,46 +1,445 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>prufus</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>prufus — Bootable USB creator for GNU/Linux</title>
+<meta name="description" content="Create bootable USB drives from .iso images on GNU/Linux. Free, open source, GPL 3.">
+<link rel="icon" href="prufus1.png">
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+  :root {
+    --bg: #0f1115;
+    --bg-alt: #161923;
+    --card: #1b1f2b;
+    --border: #2a2f3d;
+    --text: #e8eaf0;
+    --text-dim: #9aa1b4;
+    --accent: #7c3aed;
+    --accent-2: #a78bfa;
+    --danger: #7f1d1d;
+  }
 
-    .column {
-      float: left;
-      width: 33.33%;
-      padding: 5px;
-    }
+  * { box-sizing: border-box; }
 
-    /* Clearfix (clear floats) */
-    .row::after {
-      content: "";
-      clear: both;
-      display: table;
-    }
-  </style>
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  a { color: var(--accent-2); }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  header.nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(15, 17, 21, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .brand img { width: 28px; height: 28px; border-radius: 6px; }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    font-size: 0.95rem;
+  }
+
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .hero {
+    text-align: center;
+    padding: 96px 24px 64px;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(124, 58, 237, 0.25), transparent 60%),
+      var(--bg);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero p.tagline {
+    color: var(--text-dim);
+    font-size: 1.15rem;
+    max-width: 560px;
+    margin: 0 auto 32px;
+  }
+
+  .cta-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 26px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .btn:hover { transform: translateY(-1px); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: #6d28d9; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--accent-2); }
+
+  .hero-shot {
+    margin: 56px auto 0;
+    max-width: 760px;
+  }
+
+  .hero-shot img {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  section { padding: 72px 24px; }
+
+  section h2 {
+    font-size: 1.9rem;
+    text-align: center;
+    margin: 0 0 8px;
+  }
+
+  section .lead {
+    text-align: center;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin: 0 auto 48px;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+  }
+
+  .feature {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .feature .icon { font-size: 1.6rem; margin-bottom: 12px; }
+
+  .feature h3 { margin: 0 0 8px; font-size: 1.05rem; }
+
+  .feature p { margin: 0; color: var(--text-dim); font-size: 0.95rem; }
+
+  .shots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .shots figure { margin: 0; }
+
+  .shots img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: block;
+  }
+
+  .shots figcaption {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+
+  .steps {
+    counter-reset: step;
+    display: grid;
+    gap: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .step p { margin: 0; }
+
+  .step code {
+    display: block;
+    margin-top: 8px;
+    background: #0b0d12;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    color: var(--accent-2);
+  }
+
+  .warning {
+    max-width: 640px;
+    margin: 40px auto 0;
+    background: rgba(127, 29, 29, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: 12px;
+    padding: 18px 20px;
+    color: #fecaca;
+    font-size: 0.92rem;
+  }
+
+  .warning strong { color: #fff; }
+
+  .cta-section {
+    text-align: center;
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  footer a { color: var(--text-dim); }
+
+  @media (max-width: 640px) {
+    .shots { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
 </head>
 
 <body>
-  <h1>prufus</h1>
-  <p>Create bootable USB from .iso images on GNU/Linux</p>
 
-<div class="row">
-  <div class="column">
-    <img src="prufus1.png" alt="prufus_screenshot" style="width:100%">
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <img src="prufus1.png" alt="">
+      prufus
+    </div>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/oscarpavon/prufus">GitHub</a>
+    </nav>
   </div>
-  <div class="column">
-    <a href="https://github.com/oscarpavon/prufus/releases/download/v0.001a/prufus_installer.zip">
-    <button><img src="download_button.png"/></button>
-    </a>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Create bootable USB drives<br>from GNU/Linux</h1>
+    <p class="tagline">
+      A free, open source tool to flash .iso images to a USB stick — including Windows installers — without leaving Linux.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/oscarpavon/prufus/releases/download/v0.001a/prufus_installer.zip">
+        Download prufus_installer.zip
+      </a>
+      <a class="btn btn-secondary" href="#install">Build from source</a>
+    </div>
+    <div class="hero-shot">
+      <img src="screenshot1.png" alt="prufus main window">
+    </div>
   </div>
-</div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Why prufus</h2>
+    <p class="lead">Built for people who repair computers or just want a straightforward way back to Windows when they need it.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="icon">🖥️</div>
+        <h3>Native GNU/Linux</h3>
+        <p>No virtual machines or dual booting required. Runs directly on your Linux desktop with GTK.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">💾</div>
+        <h3>Handles large images</h3>
+        <p>Splits Windows installation files larger than 4GB automatically to work around the FAT32 limit.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🔓</div>
+        <h3>Open source, GPL 3</h3>
+        <p>Modify it, rename it, or sell it — as long as your changes to the source stay open.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">⚡</div>
+        <h3>GUI or terminal</h3>
+        <p>Use the desktop app, or drive it from a script: <code>prufus.sh image.iso /dev/sdb</code>.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🔒</div>
+        <h3>UEFI / GPT only</h3>
+        <p>Targets modern GPT + UEFI setups. No legacy BIOS hacks, no TPM bypasses — ever.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🗂️</div>
+        <h3>Two partitions</h3>
+        <p>Creates an EFI boot partition plus an NTFS data partition with a proper disk label.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="screenshots">
+  <div class="wrap">
+    <h2>See it in action</h2>
+    <p class="lead">Pick an .iso, pick a drive, and prufus takes care of the rest.</p>
+    <div class="shots">
+      <figure>
+        <img src="screenshot1.png" alt="prufus ready to create a bootable USB">
+        <figcaption>Select an .iso and target drive</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshot2.png" alt="prufus writing progress">
+        <figcaption>Writing the bootable USB</figcaption>
+      </figure>
+    </div>
+    <div class="warning">
+      <strong>Warning:</strong> disk operations on GNU/Linux need root privileges — you won't even see your USB drive without <code>sudo</code>, and the GUI will ask for it to format the drive.
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install from source</h2>
+    <p class="lead">Dependencies: GTK 4.16.7, make, gcc, rsync, wimlib-imagex, dosfstools, ntfs3g.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <p>Install build dependencies (Ubuntu/Mint):</p>
+          <code>sudo apt-get install git libgtk-4-dev
+sudo apt install wimtools</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <p>Clone and build:</p>
+          <code>git clone https://github.com/oscarpavon/prufus
+cd prufus
+make</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <p>Install the program, launcher, icon and desktop entry:</p>
+          <code>sudo make install</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <p>Launch prufus from your desktop, or run it directly from the terminal:</p>
+          <code>sudo prufus.sh ./Downloads/Windows.iso /dev/sdb</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="wrap">
+    <h2>Ready to try prufus?</h2>
+    <p class="lead">Grab the installer or build it yourself — either way, you're a few minutes from a bootable USB.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/oscarpavon/prufus/releases/download/v0.001a/prufus_installer.zip">
+        Download prufus_installer.zip
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/oscarpavon/prufus">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>prufus is free software licensed under GPL 3.</p>
+  <p>Questions? Ask on <a href="https://www.threads.net/@oscar0pavon">Threads</a> or open an issue on <a href="https://github.com/oscarpavon/prufus">GitHub</a>.</p>
+</footer>
 
 </body>
-
 </html>
