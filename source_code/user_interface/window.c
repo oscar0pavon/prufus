@@ -1,4 +1,5 @@
 #include "window.h"
+#include "font.h"
 #include "input.h"
 
 #include <stdio.h>
@@ -7,8 +8,6 @@
 #include <pfonts/pfonts.h>
 #include <pfonts/pfonts_cpu.h>
 
-#define FONT_PATH "/usr/share/fonts/TTF/DejaVuSans.ttf"
-#define FONT_PIXEL_HEIGHT 20.f
 
 bool prufus_window_running = true;
 

@@ -17,12 +17,13 @@ void draw_section_header(const char* text, float x, float y, float width);
 
 float measure_text_width(const char* text);
 
-/* Draws text scaled up by `scale` (pfonts has only one point size - see
- * draw_text_scaled()'s comment in draw.c for how this is faked) and returns
- * the width it drew at. */
+/* Draws text at `scale` times the body size, from a font opened at that size
+ * rather than the body font scaled up, and returns the width it drew at. */
 float draw_text_scaled(const char* text, float x, float y, float scale);
 
 float measure_text_scaled_width(const char* text, float scale);
+
+void draw_close_fonts(void);
 
 typedef enum StatusBarState{
     STATUS_BAR_IDLE,
@@ -32,10 +33,5 @@ typedef enum StatusBarState{
 } StatusBarState;
 
 void draw_status_bar(StatusBarState state, float x, float y, float width, float height, const char* text);
-
-/* Must be called once per frame, alongside pfonts_cpu_set_target() /
- * cpu_image_set_target(), so draw_section_header() can composite scaled-up
- * text onto the real target buffer. */
-void draw_set_target(uint32_t* pixels, int width, int height, int stride);
 
 #endif

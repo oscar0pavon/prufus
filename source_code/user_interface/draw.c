@@ -1,22 +1,10 @@
 #include "draw.h"
+#include "font.h"
 
 #include <pfonts/pfonts.h>
 #include <pfonts/pfonts_cpu.h>
-#include <pixman.h>
 #include <stdlib.h>
 #include <math.h>
-
-static uint32_t* target_pixels = NULL;
-static int target_width = 0;
-static int target_height = 0;
-static int target_stride = 0; /* pixels, not bytes */
-
-void draw_set_target(uint32_t* pixels, int width, int height, int stride){
-    target_pixels = pixels;
-    target_width = width;
-    target_height = height;
-    target_stride = stride;
-}
 
 static const PColor button_border_color = {211.f/255.f, 211.f/255.f, 211.f/255.f};
 static const PColor button_fill_color = {1.f, 1.f, 1.f};
@@ -33,11 +21,6 @@ static const PColor status_idle_color = {0.85f, 0.85f, 0.85f};
 static const PColor status_working_color = {0.2f, 0.5f, 0.85f};
 static const PColor status_success_color = {0.18f, 0.6f, 0.2f};
 static const PColor status_error_color = {0.8f, 0.2f, 0.2f};
-
-/* Matches background_color in user_interface.c - the flat color the whole
- * window is cleared to before anything else is drawn. draw_text_scaled()
- * needs it to seed the off-screen buffer it anti-aliases glyphs against. */
-static const PColor page_background_color = {246.f/255.f, 245.f/255.f, 244.f/255.f};
 
 /* Rounded corners had no CPU equivalent worth building - pfonts_cpu_draw_rect
  * is axis-aligned only - so the button look is now a 1px light-gray border
@@ -89,69 +72,70 @@ float measure_text_width(const char* text){
 
 #define HEADER_TEXT_SCALE 1.7f
 
-static uint32_t pack_opaque_color(PColor color){
-    uint32_t r = (uint32_t)(color.r * 255.f + 0.5f);
-    uint32_t g = (uint32_t)(color.g * 255.f + 0.5f);
-    uint32_t b = (uint32_t)(color.b * 255.f + 0.5f);
-    return 0xFF000000u | (r << 16) | (g << 8) | b;
+/* A glyph is rasterized at the size it is drawn at, so a title is a font
+ * opened at the bigger size rather than the body font blown up - pfonts used
+ * to offer only one size, and scaling the rendered text with pixman is what
+ * made headings blurry. Sizes are few and fixed, so each one is opened once
+ * and kept. */
+#define MAX_SCALED_FONTS 4
+
+static struct {
+    float scale;
+    PFontsFont* font;
+} scaled_fonts[MAX_SCALED_FONTS];
+
+static PFontsFont* scaled_font(float scale){
+    for(int i = 0; i < MAX_SCALED_FONTS; ++i){
+        if(scaled_fonts[i].font && scaled_fonts[i].scale == scale)
+            return scaled_fonts[i].font;
+    }
+
+    for(int i = 0; i < MAX_SCALED_FONTS; ++i){
+        if(scaled_fonts[i].font)
+            continue;
+
+        scaled_fonts[i].font = pfonts_open_font(FONT_PATH, FONT_PIXEL_HEIGHT * scale);
+        scaled_fonts[i].scale = scale;
+        return scaled_fonts[i].font;
+    }
+
+    return NULL;
 }
 
-/* pfonts has one global glyph atlas rasterized at whatever pixel_height was
- * passed to pfonts_load_font() at startup (see pfonts' truetype.c) - there is
- * no bigger point size to draw a title in directly. Instead this renders the
- * title once at normal size into a small off-screen buffer, seeded with
- * page_background_color so the glyphs anti-alias correctly, then has pixman
- * upscale that buffer onto the real target - producing an actually bigger
- * title instead of a fake-bold trick. Returns the scaled-up width drawn. */
+void draw_close_fonts(){
+    for(int i = 0; i < MAX_SCALED_FONTS; ++i){
+        pfonts_close_font(scaled_fonts[i].font);
+        scaled_fonts[i].font = NULL;
+    }
+}
+
 float measure_text_scaled_width(const char* text, float scale){
-    int source_width = (int)ceilf(measure_text_width(text)) + 2;
-    return source_width * scale;
+    PFontsFont* font = scaled_font(scale);
+
+    if(!font)
+        return measure_text_width(text) * scale;
+
+    PFontsFont* previous = pfonts_use_font(font);
+    float width = measure_text_width(text);
+    pfonts_use_font(previous);
+
+    return width;
 }
 
 float draw_text_scaled(const char* text, float x, float y, float scale){
-    int source_width = (int)ceilf(measure_text_width(text)) + 2;
-    int source_height = (int)ceilf(pfonts_get_cell_height()) + 2;
+    PFontsFont* font = scaled_font(scale);
 
-    if(source_width <= 0 || source_height <= 0 || !target_pixels)
+    if(!font)
         return 0;
 
-    uint32_t* source_pixels = malloc((size_t)source_width * source_height * sizeof(uint32_t));
-    if(!source_pixels)
-        return 0;
+    PFontsFont* previous = pfonts_use_font(font);
 
-    uint32_t background_pixel = pack_opaque_color(page_background_color);
-    for(int i = 0; i < source_width * source_height; ++i){
-        source_pixels[i] = background_pixel;
-    }
+    draw_text_with_color(text, x, y, text_color);
+    float width = measure_text_width(text);
 
-    pfonts_cpu_set_target(source_pixels, source_width, source_height, source_width);
-    draw_text_with_color(text, 0, 0, text_color);
-    pfonts_cpu_set_target(target_pixels, target_width, target_height, target_stride);
+    pfonts_use_font(previous);
 
-    pixman_image_t* source = pixman_image_create_bits(PIXMAN_x8r8g8b8,
-        source_width, source_height, source_pixels, source_width * 4);
-    pixman_image_set_filter(source, PIXMAN_FILTER_BILINEAR, NULL, 0);
-
-    pixman_transform_t transform;
-    pixman_transform_init_scale(&transform,
-        pixman_double_to_fixed(1.0 / scale), pixman_double_to_fixed(1.0 / scale));
-    pixman_image_set_transform(source, &transform);
-
-    pixman_image_t* target = pixman_image_create_bits(PIXMAN_x8r8g8b8,
-        target_width, target_height, target_pixels, target_stride * 4);
-
-    float dest_width = source_width * scale;
-    float dest_height = source_height * scale;
-
-    pixman_image_composite32(PIXMAN_OP_SRC, source, NULL, target,
-        0, 0, 0, 0, (int)(x + 0.5f), (int)(y + 0.5f),
-        (int)(dest_width + 0.5f), (int)(dest_height + 0.5f));
-
-    pixman_image_unref(source);
-    pixman_image_unref(target);
-    free(source_pixels);
-
-    return dest_width;
+    return width;
 }
 
 /* Rule runs beside the title - filling the rest of the row - like Rufus's
